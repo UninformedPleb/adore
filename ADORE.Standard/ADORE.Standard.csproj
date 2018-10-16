@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>UninformedPleb</Authors>
+    <Product>ADORE.Standard</Product>
+    <Company />
+    <Description>ADO is Really Easy! (.Net Standard version)</Description>
+    <Copyright>UninformedPleb (Matt Hanvelt)</Copyright>
   </PropertyGroup>
 
 </Project>
