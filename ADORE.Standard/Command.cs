@@ -6,9 +6,21 @@ namespace ADORE.Standard
 {
 	public class Command : IDisposable
 	{
+		/// <summary>
+		/// <para>The connection manager that handles all connection and provider-factory details for this command</para>
+		/// </summary>
 		internal ConnectionManager ConnectionManager { get; set; }
+		/// <summary>
+		/// <para>The underlying DbCommand used by this command. (This command object is a wrapper.)</para>
+		/// </summary>
 		internal DbCommand DbCommand { get; set; }
+		/// <summary>
+		/// <para>The parameters to be sent with this command.</para>
+		/// </summary>
 		public CommandParameterCollection Parameters { get; private set; }
+		/// <summary>
+		/// <para>The command timeout, in seconds, used by this command.</para>
+		/// </summary>
 		public int Timeout
 		{
 			get { return this.DbCommand.CommandTimeout; }
@@ -40,6 +52,10 @@ namespace ADORE.Standard
 		#endregion
 
 		#region param mappings
+		/// <summary>
+		/// <para>Maps values from pseudo-parameters (CommandParameters) into native ADO DbParameters.</para>
+		/// <para>This is done because DbParameter is abstract and cannot be instantiated without a factory instance, while CommandParameters must be done without a known factory instance.</para>
+		/// </summary>
 		private void MapToDBP()
 		{
 			this.DbCommand.Parameters.Clear();
@@ -54,6 +70,9 @@ namespace ADORE.Standard
 				this.DbCommand.Parameters.Add(param);
 			}
 		}
+		/// <summary>
+		/// <para>Maps values from output, input-output, and return directional native ADO DbParameters back into the pseudo-parameter collection.</para>
+		/// </summary>
 		private void MapFromDBP()
 		{
 			for(int x = 0; x < this.DbCommand.Parameters.Count; x++)
@@ -66,6 +85,10 @@ namespace ADORE.Standard
 		}
 		#endregion
 
+		/// <summary>
+		/// <para>Executes the command's query and fills a DataSet with the results.</para>
+		/// </summary>
+		/// <returns>All resultsets returned by the query, contained in a DataSet.</returns>
 		public DataSet RetrieveDataSet()
 		{
 			DataSet ds = null;
@@ -87,6 +110,10 @@ namespace ADORE.Standard
 			}
 			return ds;
 		}
+		/// <summary>
+		/// <para>Executes the command's query and fills a DataTable with the results in the first resultset returned by the query.</para>
+		/// </summary>
+		/// <returns>The first resultset returned by the query, contained in a DataTable.</returns>
 		public DataTable RetrieveDataTable()
 		{
 			DataTable dt = null;
@@ -108,6 +135,10 @@ namespace ADORE.Standard
 			}
 			return dt;
 		}
+		/// <summary>
+		/// <para>Executes the command's query and returns the first resultset's first row's first column value as a scalar value.</para>
+		/// </summary>
+		/// <returns>The first field value returned by the query.</returns>
 		public object ExecuteScalar()
 		{
 			object o = null;
@@ -124,6 +155,9 @@ namespace ADORE.Standard
 			}
 			return o;
 		}
+		/// <summary>
+		/// <para>Executes the command's query and returns no results.</para>
+		/// </summary>
 		public void Execute()
 		{
 			try
