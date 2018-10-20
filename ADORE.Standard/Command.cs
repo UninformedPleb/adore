@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Dynamic;
+using System.Reflection;
 
 namespace ADORE.Standard
 {
@@ -172,5 +175,62 @@ namespace ADORE.Standard
 				this.ConnectionManager.Disconnect(this.DbCommand);
 			}
 		}
+
+		#region beyond here there be dragons... and reflection... and dynamic objects. BEWARE.
+		/// <summary>
+		/// <para>EXPERIMENTAL.</para>
+		/// <para>Retrieves the query data into a list of an object of a given type (T).</para>
+		/// <para>Tries to load both fields and properties matching the column names.</para>
+		/// </summary>
+		/// <typeparam name="T">The type to attempt to fill with data</typeparam>
+		/// <returns>A list of T's, hopefully populated with the data from the results.</returns>
+		public List<T> RetrieveList<T>()
+		where T : new()
+		{
+			DataTable dt = this.RetrieveDataTable();
+
+			Type tt = typeof(T);
+
+			List<T> ts = new List<T>();
+			T t;
+			foreach(DataRow dr in dt.Rows)
+			{
+				t = new T();
+
+				for(int x = 0; x < dt.Columns.Count; x++)
+				{
+					tt.GetField(dt.Columns[x].ColumnName)?.SetValue(t, dr[dt.Columns[x].ColumnName]);
+					tt.GetProperty(dt.Columns[x].ColumnName)?.SetValue(t, dr[dt.Columns[x].ColumnName]);
+				}
+
+				ts.Add(t);
+			}
+			return ts;
+		}
+		/// <summary>
+		/// <para>EXPERIMENTAL.</para>
+		/// <para>Retrieves the query data into a list of dynamic objects.</para>
+		/// <para>Abandon all hope ye who enter here. REPENT! THE END IS NIGH!</para>
+		/// </summary>
+		/// <returns>A list of dynamic objects (specifically, ExpandoObjects).</returns>
+		public List<dynamic> RetrieveDynamic()
+		{
+			DataTable dt = this.RetrieveDataTable();
+
+			List<dynamic> ld = new List<dynamic>();
+			dynamic d;
+			foreach(DataRow dr in dt.Rows)
+			{
+				d = new ExpandoObject();
+				var dd = d as IDictionary<string,object>;
+				for(int x = 0; x< dt.Columns.Count; x++)
+				{
+					dd[dt.Columns[x].ColumnName] = dr[dt.Columns[x].ColumnName];
+				}
+				ld.Add(d);
+			}
+			return ld;
+		}
+		#endregion
 	}
 }
