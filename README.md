@@ -1,4 +1,4 @@
-# adore
+# ADORE
 
 ADORE is a backronym for ADO is Really Easy.
 
