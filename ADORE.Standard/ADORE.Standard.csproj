@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45;net46;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net47</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>UninformedPleb</Authors>
     <Product>ADORE.Standard</Product>
@@ -12,10 +12,10 @@
     <PackageProjectUrl>https://github.com/UninformedPleb/adore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/UninformedPleb/adore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>- Added generic and dynamic variations on the Command.RetrieveX methods</PackageReleaseNotes>
+    <PackageReleaseNotes>- Added multi-targeting for .Net 4.7</PackageReleaseNotes>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
