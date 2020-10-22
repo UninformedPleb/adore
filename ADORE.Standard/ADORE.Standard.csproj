@@ -8,7 +8,7 @@
     <Company />
     <Description>ADO is Really Easy! (.Net Standard version)</Description>
     <Copyright>UninformedPleb (Matt Hanvelt)</Copyright>
-    <PackageLicenseUrl>https://github.com/UninformedPleb/adore/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/UninformedPleb/adore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/UninformedPleb/adore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -16,6 +16,7 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.1.0</FileVersion>
     <Version>1.0.4</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
