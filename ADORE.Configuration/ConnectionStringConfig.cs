@@ -7,7 +7,7 @@ namespace ADORE.Configuration
 	{
 		public string ConnectionName { get; set; }
 		public string ProviderName { get; set; }
-		public Dictionary<string,string> ConnectionStringValues { get; set; }
+		public Dictionary<string,string> ConnectionStringValues { get; set; } = new Dictionary<string, string>();
 
 		public string ConnectionString
 		{
@@ -31,6 +31,23 @@ namespace ADORE.Configuration
 				}
 				return string.Empty;
 			}
+		}
+
+		public static ConnectionStringConfig Parse(string s)
+		{
+			var csc = new ConnectionStringConfig();
+
+			string[] pairs = s.Split(';');
+			foreach(var pair in pairs)
+			{
+				string[] kv = pair.Split('=');
+				if(kv.Length < 1) { continue; }
+				string key = kv[0];
+				string value = kv.Length > 1 ? kv[1] : string.Empty;
+				csc.ConnectionStringValues[key] = value;
+			}
+
+			return csc;
 		}
 	}
 }

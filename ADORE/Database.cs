@@ -26,12 +26,18 @@ namespace ADORE
 		/// <param name="parameterMap">The parameters, as an object.</param>
 		/// <param name="commandType">The type of query.</param>
 		/// <returns></returns>
-		public Query CreateQuery(string sql, object parameterMap = null, CommandType commandType = CommandType.Text)
+		public Query CreateQuery(string sql, CommandType commandType = CommandType.Text, params object[] parameterMap)
 		{
 			var q = new Query(this);
 			q.Text = sql;
 			q.CommandType = commandType;
-			if(parameterMap is not null) { q.Parameters.MapObject(parameterMap); }
+			if(parameterMap is not null)
+			{
+				for(int x = 0; x < parameterMap.Length; x++)
+				{
+					q.Parameters.MapObject(parameterMap[x]);
+				}
+			}
 			return q;
 		}
 		/// <summary>
@@ -40,9 +46,9 @@ namespace ADORE
 		/// <param name="procName">The query string.</param>
 		/// <param name="parameterMap">The parameters, as an object.</param>
 		/// <returns></returns>
-		public Query CreateStoredProcedure(string procName, object parameterMap = null)
+		public Query CreateStoredProcedure(string procName, params object[] parameterMap)
 		{
-			return CreateQuery(procName, parameterMap, CommandType.StoredProcedure);
+			return CreateQuery(procName, CommandType.StoredProcedure, parameterMap);
 		}
 	}
 }
