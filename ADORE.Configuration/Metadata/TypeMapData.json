@@ -1,0 +1,171 @@
+﻿[
+	// exact numerics
+	{
+		"SqlType": "tinyint",
+		"CSharpType": "byte",
+		"CSharpNullDefault": false,
+		"DbType": "Byte"
+	},
+	{
+		"SqlType": "smallint",
+		"CSharpType": "short",
+		"CSharpNullDefault": false,
+		"DbType": "Int16"
+	},
+	{
+		"SqlType": "int",
+		"CSharpType": "int",
+		"CSharpNullDefault": false,
+		"DbType": "Int32"
+	},
+	{
+		"SqlType": "bigint",
+		"CSharpType": "long",
+		"CSharpNullDefault": false,
+		"DbType": "Int64"
+	},
+	{
+		"SqlType": "bit",
+		"CSharpType": "bool",
+		"CSharpNullDefault": false,
+		"DbType": "Boolean"
+	},
+	{
+		"SqlType": "decimal",
+		"CSharpType": "decimal",
+		"CSharpNullDefault": false,
+		"DbType": "Decimal"
+	},
+	{
+		"SqlType": "numeric",
+		"CSharpType": "decimal",
+		"CSharpNullDefault": false,
+		"DbType": "Decimal"
+	},
+	{
+		"SqlType": "money",
+		"CSharpType": "decimal",
+		"CSharpNullDefault": false,
+		"DbType": "Money"
+	},
+	{
+		"SqlType": "smallmoney",
+		"CSharpType": "decimal",
+		"CSharpNullDefault": false,
+		"DbType": "Money"
+	},
+	// approximate numerics
+	{
+		"SqlType": "real",
+		"CSharpType": "float",
+		"CSharpNullDefault": false,
+		"DbType": "Single"
+	},
+	{
+		"SqlType": "float",
+		"CSharpType": "double",
+		"CSharpNullDefault": false,
+		"DbType": "Double"
+	},
+	// date and time
+	{
+		"SqlType": "date",
+		"CSharpType": "DateOnly",
+		"CSharpNullDefault": false,
+		"DbType": "Date"
+	},
+	{
+		"SqlType": "time",
+		"CSharpType": "TimeOnly",
+		"CSharpNullDefault": false,
+		"DbType": "Time"
+	},
+	{
+		"SqlType": "datetime2",
+		"CSharpType": "DateTime",
+		"CSharpNullDefault": false,
+		"DbType": "DateTime"
+	},
+	{
+		"SqlType": "datetimeoffset",
+		"CSharpType": "DateTimeOffset",
+		"CSharpNullDefault": false,
+		"DbType": "DateTimeOffset"
+	},
+	{
+		"SqlType": "datetime",
+		"CSharpType": "DateTime",
+		"CSharpNullDefault": false,
+		"DbType": "DateTime"
+	},
+	{
+		"SqlType": "smalldatetime",
+		"CSharpType": "DateTime",
+		"CSharpNullDefault": false,
+		"DbType": "DateTime"
+	},
+	// character strings
+	{
+		"SqlType": "char",
+		"CSharpType": "char",
+		"CSharpNullDefault": false,
+		"DbType": "Char"
+	},
+	{
+		"SqlType": "varchar",
+		"CSharpType": "string",
+		"CSharpNullDefault": true,
+		"DbType": "String"
+	},
+	{
+		"SqlType": "text",
+		"CSharpType": "string",
+		"CSharpNullDefault": true,
+		"DbType": "String"
+	},
+	// unicode character strings
+	{
+		"SqlType": "nchar",
+		"CSharpType": "char",
+		"CSharpNullDefault": false,
+		"DbType": "Char"
+	},
+	{
+		"SqlType": "nvarchar",
+		"CSharpType": "string",
+		"CSharpNullDefault": true,
+		"DbType": "String"
+	},
+	{
+		"SqlType": "ntext",
+		"CSharpType": "string",
+		"CSharpNullDefault": true,
+		"DbType": "String"
+	},
+	// binary strings
+	{
+		"SqlType": "binary",
+		"CSharpType": "byte[]",
+		"CSharpNullDefault": true,
+		"DbType": "Binary"
+	},
+	{
+		"SqlType": "varbinary",
+		"CSharpType": "byte[]",
+		"CSharpNullDefault": true,
+		"DbType": "Binary"
+	},
+	{
+		"SqlType": "image",
+		"CSharpType": "byte[]",
+		"CSharpNullDefault": true,
+		"DbType": "Binary"
+	},
+	// other data types
+	{
+		"SqlType": "uniqueidentifier",
+		"CSharpType": "Guid",
+		"CSharpNullDefault": false,
+		"DbType": "Guid"
+	}
+]

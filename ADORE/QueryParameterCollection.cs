@@ -1,0 +1,81 @@
+﻿using System.Data;
+using System.Data.Common;
+
+namespace ADORE
+{
+	public class QueryParameterCollection
+	{
+		private Dictionary<string,QueryParameter> _parameters = new Dictionary<string, QueryParameter>();
+
+		/// <summary>
+		/// <para>Gets the parameter in the collection indexed by the given name.</para>
+		/// </summary>
+		/// <param name="name">The name to search for.</param>
+		/// <returns>The named QueryParameter.</returns>
+		public QueryParameter this[string name] { get => _parameters[name]; }
+
+		// internal, so this should only be created by Query
+		internal QueryParameterCollection() { }
+
+		#region command parameter mapping - internal only
+		/// <summary>
+		/// <para>Maps this parameter collection to a command's parameter collection.</para>
+		/// <para>NOTE: This is destructive to the existing command parameters.</para>
+		/// </summary>
+		/// <param name="cmd">The command to map to.</param>
+		internal void MapToCommand(DbCommand cmd)
+		{
+			cmd.Parameters.Clear();
+			DbParameter param;
+			foreach(var kvp in _parameters)
+			{
+				param = cmd.CreateParameter();
+				param.ParameterName = kvp.Value.ParameterizedName;
+				param.Value = kvp.Value.Value;
+				param.DbType = kvp.Value.Type;
+				param.Direction = kvp.Value.Direction;
+				cmd.Parameters.Add(param);
+			}
+		}
+		/// <summary>
+		/// <para>Maps the command's output, in-out, and return parameters to this parameter collection.</para>
+		/// <para>Input-only parameters are left as-is, since their values should not have changed in the database script.</para>
+		/// </summary>
+		/// <param name="cmd">The command to map from.</param>
+		internal void MapFromCommand(DbCommand cmd)
+		{
+			foreach(var kvp in _parameters.Where(kvp => kvp.Value.Direction != ParameterDirection.Input))
+			{
+				kvp.Value.Value = cmd.Parameters[kvp.Value.ParameterizedName].Value;
+			}
+		}
+		#endregion
+
+		public void Add(QueryParameter param)
+		{
+			_parameters[param.ParameterizedName] = param;
+		}
+
+		public void MapObject(object param)
+		{
+			foreach(var field in param.GetType().GetFields())
+			{
+				Add(new QueryParameter() {
+					Name = field.Name,
+					Value = field.GetValue(param),
+					Type = QueryParameter.GetDbTypeMapping(field.FieldType),
+					Direction = ParameterDirection.InputOutput,
+				});
+			}
+			foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead))
+			{
+				Add(new QueryParameter() {
+					Name = prop.Name,
+					Value = prop.GetValue(param),
+					Type = QueryParameter.GetDbTypeMapping(prop.PropertyType),
+					Direction = ParameterDirection.InputOutput,
+				});
+			}
+		}
+	}
+}

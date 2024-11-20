@@ -1,0 +1,23 @@
+# name: nugetify
+
+# on:
+#   release:
+#     types: [published]
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 5
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v4
+#     - name: Setup .NET
+#       uses: actions/setup-dotnet@v4
+#       with:
+#         dotnet-version: 8
+#     - name: Build
+#       run: dotnet build -c Release ADORE
+#     - name: Pack nuget
+#       run: dotnet pack -c Release --no-build --output .
+#     - name: Push to nuget server
+#       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
