@@ -1,0 +1,18 @@
+﻿#nullable disable
+using System.Data.Common;
+using ADORE;
+[[Schema]]:{{
+using {{Catalog.Namespace}}.{{Schema.Name}};
+}}:
+
+namespace {{Catalog.Namespace}}
+{
+	public partial class {{Catalog.Classname}} : Database
+	{
+		[[Schema]]:{{
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
+		public {{Schema.Classname}} {{Schema.Name}} { get; private set; }
+		}}:
+	}
+}
+#nullable restore
