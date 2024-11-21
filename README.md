@@ -14,8 +14,10 @@ everything has some cleanup task or another that needs to be tended to.
 
 ADORE simplifies ADO code down to its logical operations. Make a connection, 
 get a query on that connection, run that query, then get the result. No more 
-futzing around with making sure the connection state is valid or worrying about
+messing around with making sure the connection state is valid or worrying about
 whether you remembered to tie up all of the loose ends afterward.
+
+## A Little History
 
 I started ADORE many years ago, developed its concepts in various commercial
 projects through a couple of decades, and finally gave it a name and used it
@@ -64,8 +66,8 @@ Simply add the providers to your config:
 ```
 
 If you're using DI-style startup, as most projects do these days, ADORE will
-automatically register the providers in ADORE:DbProviderFactories when you add
-it to your services collection.
+automatically register the providers in ADORE:ProviderFactories when you add it
+to your services collection.
 
 ##### Without Dependency Injection (DI)
 
@@ -107,30 +109,35 @@ builder.Services.ConfigureOptions<AdoreConfigSetup>();
 ```
 
 The order doesn't matter for these, since ConfigureAdore doesn't use DI and
-has to have the config passed in manually.
+has to have the config passed in manually. All the second line does is make the
+AdoreConfig injectable into other classes later on.
 
 ##### Without DI
 
 If you're not using DI, it's not strictly necessary to register the connection
 strings. The registered connection strings are mostly used to register typed
 database classes for DI. But if you want to, you can register connections
-yourself. A method has been provided for this express purpose.
-
-```C#
-ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnection(connectionName, providerName, connectionString);
-```
+yourself. Methods have been provided for this express purpose.
 
 If you're using AdoreConfig from the appsettings.json configset, you'll probably
-use it this way:
+use the overload that takes a ConnectionStringConfig, like this:
 
 ```C#
 foreach(var csc in builder.Configuration.GetSection("ADORE").Get<AdoreConfig>().ConnectionStrings)
 {
-	ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnection(csc.ConnectionName, csc.ProviderName, csc.ConnectionString);
+	ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnection(csc);
 }
 ```
 
-If you're still using old web.configs, you'll probably use it this way:
+Or, if you have an IEnumerable\<ConnectionStringConfig>, you could use the bulk
+registration version:
+
+```C#
+ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnections(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>().ConnectionStrings);
+```
+
+If you're still using old web.configs, you'll probably use the overload that
+takes a connection name, provider name, and connection string, like this:
 
 ```C#
 foreach(var css in ConfigurationManager.ConnectionStrings.Cast<ConnectionStringsSettings>())
@@ -159,7 +166,8 @@ as implementations of the Database, Schema, and Query classes.
 
 Examples in this section will be built around the following database structure:
 
-Database: MusicLibrary
+Database:
+- MusicLibrary (MSSQLServer)
 
 Schemas:
 - dbo (the default schema for SQL Server)
@@ -192,19 +200,36 @@ Stored Procedures:
 Tables are POCOs. There's nothing special about them, really. They serve as a
 pre-configured mapping of a single database record.
 
-Here's an example:
+Here are some examples:
 
 ```C#
-public class Genre
+public class Song
 {
+	public int SongID { get; set; }
+	public int AlbumID { get; set; }
 	public int GenreID { get; set; }
 	public string Name { get; set; }
+}
+
+public class Artist
+{
+	public int ArtistID { get; set; }
+	public string Name { get; set; }
+}
+
+public class Album
+{
+	public int AlbumID { get; set; }
+	public string Name { get; set; }
+	public string Publisher { get; set; }
+	public byte[] CoverArtwork { get; set; }
 }
 ```
 
 Alternatively, you could use a record type instead:
 
 ```C#
+public record Performance(int SongID, int ArtistID, DateTime PerformanceDate, string Instrument);
 public record Genre(int GenreID, string Name);
 ```
 
@@ -224,7 +249,7 @@ To represent a database schema, ADORE provides the Schema base class for you to
 extend like this:
 
 ```C#
-public class metadata : Schema
+public class MetadataSchema : Schema
 {
 ```
 
@@ -232,7 +257,7 @@ First, we need a constructor. These don't really do much beyond attaching this
 instance of the class to its parent Database.
 
 ```C#
-	public metadata(Database parent) : base(parent) { }
+	public MetadataSchema(Database parent) : base(parent) { }
 ```
 
 Next, we have to implement the Name property getter that the base class expects.
@@ -260,9 +285,8 @@ like a waste of time, but later, the benefits will be clear.
 	}
 ```
 
-Do that for all of the stored procs in the schema.
-
-And then we're done.
+Do that for all of the stored procs in the schema, and the schema class is
+complete.
 
 ```C#
 }
@@ -278,14 +302,7 @@ public class MusicLibraryDatabase : Database
 {
 ```
 
-The first piece is, of course, the constructor. It anchors our database object
-to its provider factory and connection string.
-
-```C#
-	public MusicLibraryDatabase(DbProviderFactory factory, string connectionString) : base(factory, connectionString) { }
-```
-
-Next, we have the schemas that belong to this database.
+First, the database needs its schema instance properties.
 
 NOTE: If you follow the usual naming styles for SQL Server, these will be
 lower-case public properties. Automated code analysis will probably complain
@@ -299,7 +316,19 @@ SuppressMessageAttribute to these if you wish.
 	public MetadataSchema metadata { get; private set; }
 ```
 
-And then it's done.
+Next, the constructor. It anchors our database object to its provider factory
+and connection string. It also initializes the schema instances.
+
+```C#
+	public MusicLibraryDatabase(DbProviderFactory factory, string connectionString) : base(factory, connectionString)
+	{
+		this.dbo = new DboSchema(this);
+		this.metadata = new MetadataSchema(this);
+	}
+```
+
+With that, the database class contains a ready-to-use instance of each of its
+schemas and is complete.
 
 ```
 }
@@ -308,7 +337,18 @@ And then it's done.
 ##### Putting It All Together
 
 To use it via DI, simply put a database object into the constructor of your
-DI-participating classes.
+DI-participating classes to initialize it. To retrieve data from it, the
+database instance from DI provides access to the schema, which then provides
+access to the stored procedures and other queries. Calling a stored procedure is
+as simple as database.schema.storedProc(parameter1, parameter2).
+
+The example below shows how the Genre object can be retrieved from LoadGenre(),
+then updated in-place, then saved back to the database with SaveGenre().
+
+NOTE: This example expects the Genre_Save stored procedure to be written as an
+upsert that returns its upserted record, meaning that the return value from
+SaveGenre() is the current state of the record that just got loaded, modified,
+and saved.
 
 ```C#
 public class FooThingy
@@ -332,23 +372,25 @@ public class FooThingy
 }
 ```
 
-Setting things up this way, the semantics match the database structure. Clean
-and readable code are the result.
+Setting things up this way, the semantics match the database structure.
 
-This also lends itself to templated or generated code.
+This also lends itself to being templated or generated.
 
 #### Unintegrated Use
 
 All of that structure is great, but what if you just need to run a quick query?
-That, too, is available via the built-in AdHocDatabase. AdHocDatabase exposes
-the base-level Database methods CreateQuery and CreateStoredProcedure. If you
-don't need the structure outlined above, or if you just don't want it, here's
-how to use ADORE with all of the same object-mapping facilities, minus the
-overhead of enforcing a readable and concise code structure.
+That, too, is available via the AdHocDatabase. AdHocDatabase is a sealed class
+that exposes the base-level Database methods CreateQuery and
+CreateStoredProcedure. If you don't need the structure outlined above, or if you
+just don't want it, here's how to use ADORE with all of the same object-mapping
+facilities, minus the overhead of enforcing a readable and concise code
+structure.
 
 We can do the same thing as before, but without DI, without database, schema,
 and table classes, and without any pre-defined structure. All you need is a
 provider factory, a connection string, and work to do!
+
+But this example still uses a table class:
 
 ```C#
 public class FooThingy

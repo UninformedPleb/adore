@@ -36,12 +36,16 @@ namespace ADORE.Initialization
 		{
 			_config = config;
 			RegisterProviders(config.ProviderFactories);
-			RegisterConnections(config.ConnectionStrings);
+			RegisterDatabaseConnections(config.ConnectionStrings);
 
 			return services;
 		}
 
-		private static void RegisterProviders(IEnumerable<ProviderFactoryConfig> providers)
+		/// <summary>
+		/// <para>Registers multiple providers from ProviderFactoryConfigs</para>
+		/// </summary>
+		/// <param name="providers">The list of ProviderFactoryConfigs to register</param>
+		public static void RegisterProviders(IEnumerable<ProviderFactoryConfig> providers)
 		{
 			foreach(var provider in providers)
 			{
@@ -63,12 +67,24 @@ namespace ADORE.Initialization
 			return DbProviderFactories.GetFactory(pfs.First().ProviderName);
 		}
 
-		private static void RegisterConnections(IEnumerable<ConnectionStringConfig> connections)
+		/// <summary>
+		/// <para>Registers multiple connections from ConnectionStringConfigs</para>
+		/// </summary>
+		/// <param name="connections">The list of ConnectionStringConfigs to register</param>
+		public static void RegisterDatabaseConnections(IEnumerable<ConnectionStringConfig> connections)
 		{
 			foreach(var connection in connections)
 			{
 				_connectionStrings[connection.ConnectionName] = connection;
 			}
+		}
+		/// <summary>
+		/// <para>Registers a single connection from a ConnectionStringConfig</para>
+		/// </summary>
+		/// <param name="connection">The ConnectionStringConfig to register</param>
+		public static void RegisterDatabaseConnection(ConnectionStringConfig connection)
+		{
+			_connectionStrings[connection.ConnectionName] = connection;
 		}
 		/// <summary>
 		/// <para>Registers a connection directly, without the need for an AdoreConfig</para>
