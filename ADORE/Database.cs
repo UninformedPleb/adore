@@ -19,6 +19,13 @@ namespace ADORE
 			_connectionString = connectionString;
 		}
 
+		internal virtual DbConnection CreateConnection()
+		{
+			var conn = Factory.CreateConnection();
+			conn.ConnectionString = _connectionString;
+			return conn;
+		}
+
 		/// <summary>
 		/// <para>Gets a Query object initialized to use this Database.</para>
 		/// </summary>

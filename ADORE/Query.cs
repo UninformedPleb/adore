@@ -45,7 +45,7 @@ namespace ADORE
 			if(string.IsNullOrEmpty(Text)) { return result; }
 
 			// get a connection OUTSIDE the try/finally so we can make sure it always gets closed
-			using DbConnection conn = _parent.Factory.CreateConnection();
+			using DbConnection conn = _parent.CreateConnection();
 
 			try
 			{
@@ -95,7 +95,7 @@ namespace ADORE
 			if(string.IsNullOrEmpty(Text)) { return result; }
 
 			// get a connection OUTSIDE the try/finally so we can make sure it always gets closed
-			using DbConnection conn = _parent.Factory.CreateConnection();
+			using DbConnection conn = _parent.CreateConnection();
 
 			try
 			{

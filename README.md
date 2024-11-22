@@ -36,19 +36,17 @@ ADO.NET mechanism.
 
 ### Getting Started
 
-#### Register Providers
+#### Configure Providers
 
 The first step in any project that uses ADORE, or really ADO.NET, is to
 establish the database providers, the code that will handle each different DBMS
 in its own special way. Or, if there isn't a specific provider, the ODBC driver
 can be used.
 
-##### With Dependency Injection (DI)
-
 For modern .NET, you're responsible for the registration of database providers.
 These "providers" are the database access assemblies, like
 Microsoft.Data.SqlClient or Npgsql. This part of ADORE is configuration-driven.
-Simply add the providers to your config:
+Simply add the providers to your all-environments config.
 
 ```JSON
 "ADORE": {
@@ -65,89 +63,80 @@ Simply add the providers to your config:
 }
 ```
 
-If you're using DI-style startup, as most projects do these days, ADORE will
-automatically register the providers in ADORE:ProviderFactories when you add it
-to your services collection.
+ADORE will automatically register the providers in ADORE:ProviderFactories when
+you add it to your services collection.
 
-##### Without Dependency Injection (DI)
+#### Configure Connection Strings
 
-**NOTE: If you're still in the .NET Framework 4.8.x or earlier, you don't need
-to do this because Microsoft preconfigured it all for you in the machine config
-file.**
+With the providers established, now it's time to configure the connections that
+use those providers. This should be added to your per-environment config.
 
-If you're using a different startup style that doesn't involve DI, like in a
-legacy project, you will need to call DbProviderFactories.RegisterFactory()
-yourself, providing the provider name and the typename of the DbProviderFactory
-for that provider library. It will look something like this:
-
-```C#
-DbProviderFactories.RegisterFactory("MSSQLServer", "Microsoft.Data.SqlClient.SqlClientFactory, Microsoft.Data.SqlClient");
-DbProviderFactories.RegisterFactory("Postgres", "Npgsql.NpgsqlFactory, Npgsql")
+```JSON
+"ADORE": {
+	"ConnectionStrings": [
+		{
+			"ConnectionName": "musiclibrary",
+			"ProviderName": "MSSQLServer",
+			"ConnectionStringValues": {
+				"Server": "HOSTNAME_OR_IP_ADDRESS",
+				"Database": "DATABASE_CATALOG_NAME",
+				"User ID": "USERNAME",
+				"Encrypt": "Optional",
+				"TrustServerCertificate": "True"
+			}
+		}
+	]
+}
 ```
 
-This is, in fact, all the config auto-registration process is doing behind the
-scenes. Without DI, you just have to do it manually, that's all.
+And your secrets file or secure keystore should have:
 
-#### Register Connection Strings
-
-The next step is to configure connection strings to each DBMS host and database
-(catalog) that you need connections for.
-
-##### With DI
-
-Start by getting a strongly-typed AdoreConfig object out of the builder's
-configuration, then:
-
-```C#
-builder.Services.ConfigureAdore(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>());
+```JSON
+"ADORE": {
+	"ConnectionStrings": {
+		"ConnectionStringValues": {
+			"Password": YOUR_PASSWORD_HERE
+		}
+	}
+}
 ```
 
-It wouldn't hurt to add the AdoreConfig to DI while you're at it:
+#### Register ADORE Components
+
+Next, register ADORE's configuration object structure. In Program.cs, the
+builder needs to know how to use the ADORE configuration section. So we give it
+an AdoreConfigSetup object.
 
 ```C#
 builder.Services.ConfigureOptions<AdoreConfigSetup>();
 ```
 
-The order doesn't matter for these, since ConfigureAdore doesn't use DI and
-has to have the config passed in manually. All the second line does is make the
-AdoreConfig injectable into other classes later on.
+#### Configure ADORE Itself
 
-##### Without DI
-
-If you're not using DI, it's not strictly necessary to register the connection
-strings. The registered connection strings are mostly used to register typed
-database classes for DI. But if you want to, you can register connections
-yourself. Methods have been provided for this express purpose.
-
-If you're using AdoreConfig from the appsettings.json configset, you'll probably
-use the overload that takes a ConnectionStringConfig, like this:
+Now, ADORE needs to register everything. This one step will take care of all of
+the provider factories, the connection strings, and any other configuration
+values that are needed to persist ADORE throughout the lifetime of your app.
 
 ```C#
-foreach(var csc in builder.Configuration.GetSection("ADORE").Get<AdoreConfig>().ConnectionStrings)
-{
-	ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnection(csc);
-}
+builder.ConfigureAdore(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>());
 ```
 
-Or, if you have an IEnumerable\<ConnectionStringConfig>, you could use the bulk
-registration version:
+NOTE: Despite having just configured the AdoreConfigSetup, the ConfigureAdore
+method doesn't have access to use DI quite yet and has to have the config passed
+in manually. But the AdoreConfigSetup makes the AdoreConfig injectable into
+other classes later on.
+
+With this, all configured connections are available to be mapped to a Database
+class object.
+
+#### Register Databases
+
+Each of the classes you make to correspond to a database (catalog) should be
+set-up in DI. It will look something like this:
 
 ```C#
-ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnections(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>().ConnectionStrings);
+builder.Services.RegisterDatabase<MusicLibraryDatabase>("musiclibrary");
 ```
-
-If you're still using old web.configs, you'll probably use the overload that
-takes a connection name, provider name, and connection string, like this:
-
-```C#
-foreach(var css in ConfigurationManager.ConnectionStrings.Cast<ConnectionStringsSettings>())
-{
-	ADORE.Initialization.ConnectionLoader.RegisterDatabaseConnection(css.Name, css.ProviderName, css.ConnectionString);
-}
-```
-
-With all of that, you should have the providers registered and the connection
-strings ready for use.
 
 ### Using ADORE
 
@@ -276,12 +265,12 @@ like a waste of time, but later, the benefits will be clear.
 	public async Genre LoadGenre(int id)
 	{
 		var proc = CreateStoredProcedure("Genre_Load", new { GenreID = id });
-		return await proc.Run<Genre>().First();
+		return (await proc.Run<Genre>()).First();
 	}
 	public async Genre SaveGenre(Genre genre)
 	{
 		var proc = CreateStoredProcedure("Genre_Save", genre);
-		return await proc.Run<Genre>().First();
+		return (await proc.Run<Genre>()).First();
 	}
 ```
 
