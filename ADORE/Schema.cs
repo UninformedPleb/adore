@@ -1,8 +1,10 @@
-﻿namespace ADORE
+﻿using System.Data;
+
+namespace ADORE
 {
 	public abstract class Schema
 	{
-		protected Database _parent;
+		private Database _parent;
 
 		protected abstract string Name { get; }
 
@@ -11,6 +13,14 @@
 			_parent = parent;
 		}
 
+		protected virtual Query CreateQuery(string sql, params object[] parameterMap)
+		{
+			return _parent.CreateQuery(sql, parameterMap);
+		}
+		protected virtual Query CreateQuery(string sql, CommandType commandType = CommandType.Text, params object[] parameterMap)
+		{
+			return _parent.CreateQuery(sql, commandType, parameterMap);
+		}
 		protected virtual Query CreateStoredProcedure(string procName, params object[] parameterMap)
 		{
 			string[] parts = procName.Split('.');

@@ -22,9 +22,19 @@ namespace ADORE
 		/// <summary>
 		/// <para>Gets a Query object initialized to use this Database.</para>
 		/// </summary>
+		/// <param name="sql">The query string</param>
+		/// <param name="parameterMap">The parameters, as an array of objects</param>
+		/// <returns></returns>
+		public Query CreateQuery(string sql, params object[] parameterMap)
+		{
+			return CreateQuery(sql, CommandType.Text, parameterMap);
+		}
+		/// <summary>
+		/// <para>Gets a Query object initialized to use this Database.</para>
+		/// </summary>
 		/// <param name="sql">The query string.</param>
-		/// <param name="parameterMap">The parameters, as an object.</param>
 		/// <param name="commandType">The type of query.</param>
+		/// <param name="parameterMap">The parameters, as an array of objects</param>
 		/// <returns></returns>
 		public Query CreateQuery(string sql, CommandType commandType = CommandType.Text, params object[] parameterMap)
 		{
@@ -44,7 +54,7 @@ namespace ADORE
 		/// <para>Gets a Query object initialized to use this Database, and with a CommandType of StoredProcedure.</para>
 		/// </summary>
 		/// <param name="procName">The query string.</param>
-		/// <param name="parameterMap">The parameters, as an object.</param>
+		/// <param name="parameterMap">The parameters, as an array of objects</param>
 		/// <returns></returns>
 		public Query CreateStoredProcedure(string procName, params object[] parameterMap)
 		{

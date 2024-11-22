@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADORE.Standard", "ADORE.Standard\ADORE.Standard.csproj", "{FEED04A9-7B31-4F97-B4F6-C65BB5BD56CE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADORE.NetFX", "ADORE.NetFX\ADORE.NetFX.csproj", "{43DDA040-7100-4769-83D5-3C9930947E39}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADORE", "ADORE\ADORE.csproj", "{8862F289-4D49-4D65-BF4E-0234DBAA961C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADORE.Configuration", "ADORE.Configuration\ADORE.Configuration.csproj", "{ACDF1C9C-F6C1-4AEF-ACBF-3926918BE215}"
@@ -17,20 +13,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{19771D5A-5C8C-4279-86B1-7D2EA3F300E0}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\nugetify.yaml = .github\workflows\nugetify.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FEED04A9-7B31-4F97-B4F6-C65BB5BD56CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FEED04A9-7B31-4F97-B4F6-C65BB5BD56CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FEED04A9-7B31-4F97-B4F6-C65BB5BD56CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FEED04A9-7B31-4F97-B4F6-C65BB5BD56CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{43DDA040-7100-4769-83D5-3C9930947E39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{43DDA040-7100-4769-83D5-3C9930947E39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{43DDA040-7100-4769-83D5-3C9930947E39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{43DDA040-7100-4769-83D5-3C9930947E39}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8862F289-4D49-4D65-BF4E-0234DBAA961C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8862F289-4D49-4D65-BF4E-0234DBAA961C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8862F289-4D49-4D65-BF4E-0234DBAA961C}.Release|Any CPU.ActiveCfg = Release|Any CPU

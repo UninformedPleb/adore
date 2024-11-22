@@ -273,15 +273,15 @@ Now, you can make methods to create idiomatic stored procedures. This may seem
 like a waste of time, but later, the benefits will be clear.
 
 ```C#
-	public Genre LoadGenre(int id)
+	public async Genre LoadGenre(int id)
 	{
-		var proc = _parent.CreateStoredProcedure("Genre_Load", new { GenreID = id });
-		return proc.Run<Genre>().First();
+		var proc = CreateStoredProcedure("Genre_Load", new { GenreID = id });
+		return await proc.Run<Genre>().First();
 	}
-	public Genre SaveGenre(Genre genre)
+	public async Genre SaveGenre(Genre genre)
 	{
-		var proc = _parent.CreateStoredProcedure("Genre_Save", genre);
-		return proc.Run<Genre>().First();
+		var proc = CreateStoredProcedure("Genre_Save", genre);
+		return await proc.Run<Genre>().First();
 	}
 ```
 
