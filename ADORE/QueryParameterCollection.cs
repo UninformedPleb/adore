@@ -31,7 +31,7 @@ namespace ADORE
 			{
 				param = cmd.CreateParameter();
 				param.ParameterName = kvp.Value.ParameterizedName;
-				param.Value = kvp.Value.Value;
+				param.Value = kvp.Value.Value ?? DBNull.Value;
 				param.DbType = kvp.Value.Type;
 				param.Direction = kvp.Value.Direction;
 				cmd.Parameters.Add(param);
@@ -46,7 +46,7 @@ namespace ADORE
 		{
 			foreach(var kvp in _parameters.Where(kvp => kvp.Value.Direction != ParameterDirection.Input))
 			{
-				kvp.Value.Value = cmd.Parameters[kvp.Value.ParameterizedName].Value;
+				kvp.Value.Value = cmd.Parameters[kvp.Value.ParameterizedName].Value is DBNull ? null : cmd.Parameters[kvp.Value.ParameterizedName].Value;
 			}
 		}
 		#endregion
