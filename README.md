@@ -101,30 +101,16 @@ And your secrets file or secure keystore should have:
 }
 ```
 
-#### Register ADORE Components
+#### Configure ADORE
 
-Next, register ADORE's configuration object structure. In Program.cs, the
-builder needs to know how to use the ADORE configuration section. So we give it
-an AdoreConfigSetup object.
-
-```C#
-builder.Services.ConfigureOptions<AdoreConfigSetup>();
-```
-
-#### Configure ADORE Itself
-
-Now, ADORE needs to register everything. This one step will take care of all of
+Next, ADORE needs to register everything. This one step will take care of all of
 the provider factories, the connection strings, and any other configuration
-values that are needed to persist ADORE throughout the lifetime of your app.
+values that are needed to persist ADORE throughout the lifetime of your app. It
+will even register the AdoreConfig into the DI system.
 
 ```C#
 builder.ConfigureAdore(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>());
 ```
-
-NOTE: Despite having just configured the AdoreConfigSetup, the ConfigureAdore
-method doesn't have access to use DI quite yet and has to have the config passed
-in manually. But the AdoreConfigSetup makes the AdoreConfig injectable into
-other classes later on.
 
 With this, all configured connections are available to be mapped to a Database
 class object.

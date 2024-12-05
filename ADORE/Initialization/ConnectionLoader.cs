@@ -35,6 +35,8 @@ namespace ADORE.Initialization
 		public static IServiceCollection ConfigureAdore(this IServiceCollection services, AdoreConfig config)
 		{
 			_config = config;
+
+			services.ConfigureOptions<AdoreConfigSetup>();
 			RegisterProviders(config.ProviderFactories);
 			RegisterDatabaseConnections(config.ConnectionStrings);
 
