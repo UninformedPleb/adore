@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-using ADORE.Configuration;
-
-namespace ADORE.Initialization
+namespace ADORE.Configuration
 {
 	public class AdoreConfigSetup : IConfigureOptions<AdoreConfig>
 	{
