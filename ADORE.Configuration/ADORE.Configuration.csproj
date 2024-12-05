@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <SignAssembly>False</SignAssembly>
+    <Version>$(VersionPrefix)2.0.0</Version>
+    <Description>ADO is Really Easy! Configuration mappings</Description>
+    <Copyright>UninformedPleb (Matt Hanvelt)</Copyright>
+    <PackageProjectUrl>https://github.com/UninformedPleb/adore</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/UninformedPleb/adore</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>UninformedPleb</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>ADO;Database</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +21,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Metadata\TypeMapData.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
