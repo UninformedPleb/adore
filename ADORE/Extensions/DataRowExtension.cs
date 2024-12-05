@@ -4,7 +4,7 @@ namespace ADORE.Extensions
 {
 	internal static class DataRowExtension
 	{
-		public static T MapTo<T>(this DataRow dr)
+		internal static T MapTo<T>(this DataRow dr)
 		{
 			Type t = typeof(T);
 			T thing = Activator.CreateInstance<T>();

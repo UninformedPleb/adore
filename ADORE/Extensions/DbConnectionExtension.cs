@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace ADORE.Extensions
 {
-    public static class DbConnectionExtension
+    internal static class DbConnectionExtension
     {
         internal static void ReadyConnection(this DbConnection conn)
         {

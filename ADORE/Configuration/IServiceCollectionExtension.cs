@@ -1,7 +1,6 @@
-﻿using ADORE.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace ADORE.Extensions
+namespace ADORE.Configuration
 {
 	public static class IServiceCollectionExtension
 	{
@@ -19,7 +18,7 @@ namespace ADORE.Extensions
 			var factory = ConnectionLoader.GetFactory(key);
 			var connStr = ConnectionLoader.ConnectionStrings[key].ConnectionString;
 			var db = (T)Activator.CreateInstance(typeof(T), factory, connStr);
-			return services.AddSingleton<T>(db);
+			return services.AddSingleton(db);
 		}
 		/// <summary>
 		/// <para>Configures ADORE using the provided AdoreConfig</para>
