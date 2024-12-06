@@ -372,7 +372,7 @@ public class FooThingy(ConnectionLoader cl)
 {
 	public void DoStuff()
 	{
-		var adhoc = new AdHocDatabase(cl.GetFactory("MusicLibrary"), cl.GetDatabaseConnection("MusicLibrary"));
+		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
 		var query = adhoc.GetStoredProcedure("metadata.Genre_Load", new { GenreID = 27 });
 		var genre = query.Run<Genre>().First();
 		genre.Name = "Blah";
@@ -408,7 +408,7 @@ public class BarThingy(ConnectionLoader cl)
 {
 	public async bool DoStuff()
 	{
-		var adhoc = new AdHocDatabase(cl.GetFactory("MusicLibrary"), cl.GetDatabaseConnection("MusicLibrary"));
+		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
 		var query = adhoc.GetQuery("SELECT TOP 10 * FROM Foo; SELECT TOP 10 * FROM Bar WHERE BazID = @BazID;", new { BazID = 42 });
 		var qresult = await query.RunAsync();
 
