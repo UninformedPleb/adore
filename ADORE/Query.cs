@@ -135,41 +135,45 @@ namespace ADORE
 		/// <para>Runs the query, returning the first resultset as a collection of T.</para>
 		/// </summary>
 		/// <typeparam name="T">The mapped return type.</typeparam>
+		/// <param name="tableIndex">The index of the table to map</param>
 		/// <returns>An IEnumerable collection of T.</returns>
-		public IEnumerable<T> Run<T>()
+		public IEnumerable<T> Run<T>(int tableIndex = 0)
 		{
 			var result = Run();
-			return result.MapResults<T>(0);
+			return result.MapResults<T>(tableIndex);
 		}
 		/// <summary>
 		/// <para>Runs the query asynchronously, returning the first resultset as a collection of T.</para>
 		/// </summary>
 		/// <typeparam name="T">The mapped return type.</typeparam>
+		/// <param name="tableIndex">The index of the table to map</param>
 		/// <returns>A Task that eventually returns an IEnumerable collection of T.</returns>
-		public async Task<IEnumerable<T>> RunAsync<T>()
+		public async Task<IEnumerable<T>> RunAsync<T>(int tableIndex = 0)
 		{
 			var result = await RunAsync();
-			return result.MapResults<T>(0);
+			return result.MapResults<T>(tableIndex);
 		}
 		/// <summary>
 		/// <para>Runs the query, returning the first scalar result as a T.</para>
 		/// </summary>
 		/// <typeparam name="T">The scalar return type.</typeparam>
+		/// <param name="tableIndex">The index of the table to map</param>
 		/// <returns>The scalar value.</returns>
-		public T RunScalar<T>()
+		public T RunScalar<T>(int tableIndex = 0)
 		{
 			var result = Run();
-			return result.MapScalarValue<T>(0);
+			return result.MapScalarValue<T>(tableIndex);
 		}
 		/// <summary>
 		/// <para>Runs the query asynchronously, returning the first scalar result as a T.</para>
 		/// </summary>
 		/// <typeparam name="T">The scalar return type.</typeparam>
+		/// <param name="tableIndex">The index of the table to map</param>
 		/// <returns>A Task that eventually returns the scalar value.</returns>
-		public async Task<T> RunScalarAsync<T>()
+		public async Task<T> RunScalarAsync<T>(int tableIndex = 0)
 		{
 			var result = await RunAsync();
-			return result.MapScalarValue<T>(0);
+			return result.MapScalarValue<T>(tableIndex);
 		}
 	}
 }
