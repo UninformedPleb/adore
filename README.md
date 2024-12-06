@@ -390,16 +390,16 @@ you covered.
 
 The QueryResult object provides:
 
-* A copy of the query that produced this result
-* A copy of the Parameters used to run the query.
-* HasError and Exception parameters to facilitate error handling. This has a
+- A copy of the query that produced this result
+- A copy of the Parameters used to run the query.
+- HasError and Exception parameters to facilitate error handling. This has a
   side-effect of preventing database engine errors from being uncaught and
   bubbling up into calling code.
-* HasResults provides feedback about whether any resultsets were successfully
+- HasResults provides feedback about whether any resultsets were successfully
   returned.
-* A collection of resultsets, with support for named resultsets as well as
+- A collection of resultsets, with support for named resultsets as well as
   indexed access.
-* Object-mapping facilities to turn resultsets back into strongly-typed objects.
+- Object-mapping facilities to turn resultsets back into strongly-typed objects.
 
 Here's how it works:
 
