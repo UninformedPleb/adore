@@ -3,13 +3,13 @@ using Microsoft.Extensions.Options;
 
 namespace ADORE.Configuration
 {
-	public class AdoreConfigSetup : IConfigureOptions<AdoreConfig>
+	public class AdoreConfigOptions : IConfigureOptions<AdoreConfig>
 	{
 		private static readonly string _sectionName = "ADORE";
 
 		private readonly IConfiguration _configuration;
 
-		public AdoreConfigSetup(IConfiguration configuration)
+		public AdoreConfigOptions(IConfiguration configuration)
 		{
 			_configuration = configuration;
 		}

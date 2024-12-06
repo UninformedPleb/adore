@@ -15,8 +15,14 @@ namespace ADORE.Configuration
 		/// <returns></returns>
 		public static IServiceCollection RegisterDatabase<T>(this IServiceCollection services, string key) where T : Database
 		{
-			var factory = ConnectionLoader.GetFactory(key);
-			var connStr = ConnectionLoader.ConnectionStrings[key].ConnectionString;
+			// build the servicecollection into a serviceprovider to get the connection registry back out of it...
+			// yes, this is non-standard, but it makes the resulting usage so much smoother, while still keeping the connection registry testable
+			var sp = services.BuildServiceProvider();
+			var cr = sp.GetService<ConnectionRegistry>();
+
+			// now use the connectionloader to add the DB instance
+			var factory = cr.GetFactory(key);
+			var connStr = cr.ConnectionStrings[key].ConnectionString;
 			var db = (T)Activator.CreateInstance(typeof(T), factory, connStr);
 			return services.AddSingleton(db);
 		}
@@ -28,11 +34,14 @@ namespace ADORE.Configuration
 		/// <returns></returns>
 		public static IServiceCollection ConfigureAdore(this IServiceCollection services, AdoreConfig config)
 		{
-			ConnectionLoader.Config = config;
+			// add the AdoreConfig options
+			services.ConfigureOptions<AdoreConfigOptions>();
 
-			services.ConfigureOptions<AdoreConfigSetup>();
-			ConnectionLoader.RegisterProviders(config.ProviderFactories);
-			ConnectionLoader.RegisterDatabaseConnections(config.ConnectionStrings);
+			// configure and add the connection registry
+			ConnectionRegistry cr = new ConnectionRegistry() { Config = config };
+			cr.RegisterProviders();
+			cr.RegisterDatabaseConnections();
+			services.AddSingleton(cr);
 
 			return services;
 		}

@@ -2,18 +2,18 @@
 
 namespace ADORE.Configuration
 {
-	public static class ConnectionLoader
+	public class ConnectionRegistry
 	{
-		internal static AdoreConfig Config { get; set; }
-		internal static Dictionary<string, ConnectionStringConfig> ConnectionStrings { get; set; } = new Dictionary<string, ConnectionStringConfig>();
+		public AdoreConfig Config { internal get; init; }
+		internal Dictionary<string, ConnectionStringConfig> ConnectionStrings { get; set; } = new Dictionary<string, ConnectionStringConfig>();
 
 		/// <summary>
 		/// <para>Registers multiple providers from ProviderFactoryConfigs</para>
 		/// </summary>
 		/// <param name="providers">The list of ProviderFactoryConfigs to register</param>
-		public static void RegisterProviders(IEnumerable<ProviderFactoryConfig> providers)
+		public void RegisterProviders(IEnumerable<ProviderFactoryConfig> providers = null)
 		{
-			foreach(var provider in providers)
+			foreach(var provider in providers ?? Config.ProviderFactories)
 			{
 				DbProviderFactories.RegisterFactory(provider.ProviderName, provider.FactoryTypeName);
 			}
@@ -25,7 +25,7 @@ namespace ADORE.Configuration
 		/// <returns>A DbProviderFactory object corresponding to the provider named in the specified connection</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the connection name is not registered</exception>
 		/// <exception cref="ArgumentException">Thrown if the connection is found, but the provider configured on that connection is not registered.</exception>
-		public static DbProviderFactory GetFactory(string key)
+		public DbProviderFactory GetFactory(string key)
 		{
 			if(!ConnectionStrings.ContainsKey(key)) { throw new ArgumentOutOfRangeException("key", $"Key: {key}"); }
 			var pfs = Config.ProviderFactories.Where(pf => pf.ProviderName == ConnectionStrings[key].ProviderName);
@@ -37,9 +37,9 @@ namespace ADORE.Configuration
 		/// <para>Registers multiple connections from ConnectionStringConfigs</para>
 		/// </summary>
 		/// <param name="connections">The list of ConnectionStringConfigs to register</param>
-		public static void RegisterDatabaseConnections(IEnumerable<ConnectionStringConfig> connections)
+		public void RegisterDatabaseConnections(IEnumerable<ConnectionStringConfig> connections = null)
 		{
-			foreach(var connection in connections)
+			foreach(var connection in connections ?? Config.ConnectionStrings)
 			{
 				ConnectionStrings[connection.ConnectionName] = connection;
 			}
@@ -48,7 +48,7 @@ namespace ADORE.Configuration
 		/// <para>Registers a single connection from a ConnectionStringConfig</para>
 		/// </summary>
 		/// <param name="connection">The ConnectionStringConfig to register</param>
-		public static void RegisterDatabaseConnection(ConnectionStringConfig connection)
+		public void RegisterDatabaseConnection(ConnectionStringConfig connection)
 		{
 			ConnectionStrings[connection.ConnectionName] = connection;
 		}
@@ -58,7 +58,7 @@ namespace ADORE.Configuration
 		/// <param name="key">The name of the connection</param>
 		/// <param name="providerName">The name of the provider</param>
 		/// <param name="connectionString">The connection string</param>
-		public static void RegisterDatabaseConnection(string key, string providerName, string connectionString)
+		public void RegisterDatabaseConnection(string key, string providerName, string connectionString)
 		{
 			var csc = ConnectionStringConfig.Parse(connectionString);
 			csc.ConnectionName = key;
@@ -71,7 +71,7 @@ namespace ADORE.Configuration
 		/// <param name="key">The name of the connection</param>
 		/// <returns>The connection corresponding to the name</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the connection name is not registered</exception>
-		public static ConnectionStringConfig GetDatabaseConnection(string key)
+		public ConnectionStringConfig GetDatabaseConnection(string key)
 		{
 			if(!ConnectionStrings.ContainsKey(key)) { throw new ArgumentOutOfRangeException("key", $"key: {key}"); }
 			return ConnectionStrings[key];

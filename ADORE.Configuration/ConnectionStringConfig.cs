@@ -25,11 +25,12 @@ namespace ADORE.Configuration
 		{
 			get
 			{
-				foreach(var kvp in ConnectionStringValues)
+				string name = string.Empty;
+				if(!ConnectionStringValues.TryGetValue("Initial Catalog", out name))
 				{
-					if(kvp.Key == "Initial Catalog" || kvp.Key == "Database") { return kvp.Value; }
+					ConnectionStringValues.TryGetValue("Database", out name);
 				}
-				return string.Empty;
+				return name;
 			}
 		}
 
