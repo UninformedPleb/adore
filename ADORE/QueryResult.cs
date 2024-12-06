@@ -9,10 +9,9 @@ namespace ADORE
 		public static QueryResult Empty = new QueryResult();
 
 		/// <summary>
-		/// <para>Exception thrown by the Query.</para>
-		/// <para>This will be null if no exception was thrown.</para>
+		/// <para>The original query string that was run.</para>
 		/// </summary>
-		public Exception Exception { get; internal set; } = null;
+		public string QueryString { get; init; }
 		/// <summary>
 		/// <para>The query parameters, after the query has run.</para>
 		/// </summary>
@@ -21,19 +20,36 @@ namespace ADORE
 		/// <para>The raw resultsets returned by the query.</para>
 		/// </summary>
 		public DataSet RawResultset { get; internal set; }
+		/// <summary>
+		/// <para>Exception thrown by the Query.</para>
+		/// <para>This will be null if no exception was thrown.</para>
+		/// </summary>
+		public Exception Exception { get; internal set; } = null;
 
 		/// <summary>
 		/// <para>Indicates whether there was an error returned by the query.</para>
 		/// </summary>
-		public bool HasError { get => Exception is not null; }
+		public bool HasError => Exception is not null;
 		/// <summary>
 		/// <para>Indicates whether any results were returned by the query.</para>
 		/// </summary>
-		public bool HasResults { get => RawResultset is not null; }
+		public bool HasResults => RawResultset is not null;
 		/// <summary>
 		/// <para>The number of resultsets returned by the query.</para>
 		/// </summary>
-		public int ResultsCount { get => RawResultset?.Tables.Count ?? 0; }
+		public int ResultsCount => RawResultset?.Tables.Count ?? 0;
+		/// <summary>
+		/// <para>Gets a resultset from the specified table index</para>
+		/// </summary>
+		/// <param name="index">The table index</param>
+		/// <returns>A datatable containing the resultset</returns>
+		public DataTable this[int index] => RawResultset?.Tables[index];
+		/// <summary>
+		/// <para>Gets a resultset from the specified table by name</para>
+		/// </summary>
+		/// <param name="tableName">The name of the table</param>
+		/// <returns>A datatable containing the resultset</returns>
+		public DataTable this[string tableName] => RawResultset?.Tables[tableName];
 
 		// ctor internal so only Query can make one
 		internal QueryResult() { }

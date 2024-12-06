@@ -368,16 +368,59 @@ provider factory, a connection string, and work to do!
 But this example still uses a table class:
 
 ```C#
-public class FooThingy
+public class FooThingy(ConnectionLoader cl)
 {
 	public void DoStuff()
 	{
-		var adhoc = new AdHocDatabase(ConnectionLoader.GetFactory("MSSQLServer"), ConnectionLoader.GetDatabaseConnection("MusicLibrary"));
+		var adhoc = new AdHocDatabase(cl.GetFactory("MusicLibrary"), cl.GetDatabaseConnection("MusicLibrary"));
 		var query = adhoc.GetStoredProcedure("metadata.Genre_Load", new { GenreID = 27 });
 		var genre = query.Run<Genre>().First();
 		genre.Name = "Blah";
 		query = adhoc.GetStoredProcedure("metadata.Genre_Save", genre);
 		genre = query.Run<Genre>().First();
+	}
+}
+```
+
+But what if you don't have a class to map the results to? Well, lucky for you,
+ADORE has a whole QueryResult object you can use! Remember, ADORE is still just
+ADO.NET at heart, so all of the underlying mechanisms of ADO are still there in
+some form. If you just need a data table (or two!), the QueryResult object has
+you covered.
+
+The QueryResult object provides:
+
+* A copy of the query that produced this result
+* A copy of the Parameters used to run the query.
+* HasError and Exception parameters to facilitate error handling. This has a
+  side-effect of preventing database engine errors from being uncaught and
+  bubbling up into calling code.
+* HasResults provides feedback about whether any resultsets were successfully
+  returned.
+* A collection of resultsets, with support for named resultsets as well as
+  indexed access.
+* Object-mapping facilities to turn resultsets back into strongly-typed objects.
+
+Here's how it works:
+
+```C#
+public class BarThingy(ConnectionLoader cl)
+{
+	public async bool DoStuff()
+	{
+		var adhoc = new AdHocDatabase(cl.GetFactory("MusicLibrary"), cl.GetDatabaseConnection("MusicLibrary"));
+		var query = adhoc.GetQuery("SELECT TOP 10 * FROM Foo; SELECT TOP 10 * FROM Bar WHERE BazID = @BazID;", new { BazID = 42 });
+		var qresult = await query.RunAsync();
+
+		if(qresult.HasError) { throw qresult.Exception; }
+		if(!qresult.HasResults) { return false; }
+
+		// method "DoStuffWithUnknownData" takes a System.Data.DataTable
+		if(qresult.ResultsCount > 0) { DoStuffWithUnknownData(qresult[0]); }
+		// method "DoStuffWithBarData" takes an IEnumerable<Bar>
+		if(qresult.ResultsCount > 1) { DoStuffWithBarData(qresult.MapResults<Bar>(1)); }
+
+		return true;
 	}
 }
 ```

@@ -38,7 +38,7 @@ namespace ADORE
 		public QueryResult Run()
 		{
 			// create the result object. this will get filled in as we go.
-			QueryResult result = new QueryResult();
+			QueryResult result = new QueryResult() { QueryString = Text };
 
 			// sanity-check:
 			// if the query text is blank, we can't run it.
@@ -88,7 +88,7 @@ namespace ADORE
 		public async Task<QueryResult> RunAsync()
 		{
 			// create the result object. this will get filled in as we go.
-			QueryResult result = new QueryResult();
+			QueryResult result = new QueryResult() { QueryString = Text };
 
 			// sanity-check:
 			// if the query text is blank, we can't run it.
