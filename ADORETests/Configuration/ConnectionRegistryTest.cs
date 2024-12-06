@@ -6,13 +6,16 @@ namespace ADORETests.Configuration
 {
 	public class ConnectionRegistryTest
 	{
-		private class MockProviderFactory : DbProviderFactory { }
+		private class MockProviderFactory : DbProviderFactory
+		{
+			public static MockProviderFactory Instance = new MockProviderFactory();
+		}
 
 		private readonly AdoreConfig config = new AdoreConfig() {
 			ProviderFactories = new List<ProviderFactoryConfig>() {
 				new ProviderFactoryConfig() {
 					ProviderName = "mockprovider",
-					FactoryTypeName = typeof(MockProviderFactory).FullName
+					FactoryTypeName = typeof(MockProviderFactory).AssemblyQualifiedName
 				},
 			},
 			ConnectionStrings = new List<ConnectionStringConfig>() {
@@ -35,8 +38,8 @@ namespace ADORETests.Configuration
 		{
 			var cr = new ConnectionRegistry() { Config = config };
 			cr.RegisterProviders();
-			var factory = cr.GetFactory("mockprovider");
-			Assert.Equal(factory.GetType().FullName, typeof(MockProviderFactory).FullName);
+			var factory = DbProviderFactories.GetFactory("mockprovider");
+			Assert.Equal(factory.GetType().AssemblyQualifiedName, typeof(MockProviderFactory).AssemblyQualifiedName);
 		}
 		[Fact]
 		public void Connections_RegisteredCorrectly()
