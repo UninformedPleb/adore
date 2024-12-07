@@ -15,7 +15,7 @@ namespace ADORE
 		/// <summary>
 		/// <para>The database's provider factory</para>
 		/// </summary>
-		internal DbProviderFactory Factory { get; set; }
+		internal DbProviderFactory Factory { get; private set; }
 
 		// ctor protected so only implementors can call it with base()
 		protected Database(DbProviderFactory factory, string connectionString)

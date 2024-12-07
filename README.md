@@ -359,14 +359,13 @@ That, too, is available via the AdHocDatabase. AdHocDatabase is a sealed class
 that exposes the base-level Database methods CreateQuery and
 CreateStoredProcedure. If you don't need the structure outlined above, or if you
 just don't want it, here's how to use ADORE with all of the same object-mapping
-facilities, minus the overhead of enforcing a readable and concise code
-structure.
+facilities, minus the overhead of enforcing any particular code structure.
 
 We can do the same thing as before, but without DI, without database, schema,
 and table classes, and without any pre-defined structure. All you need is a
 provider factory, a connection string, and work to do!
 
-But this example still uses a table class:
+This example shows that you can still use a table class (or any POCO):
 
 ```C#
 public class FooThingy(ConnectionLoader cl)
@@ -383,11 +382,35 @@ public class FooThingy(ConnectionLoader cl)
 }
 ```
 
-But what if you don't have a class to map the results to? Well, lucky for you,
-ADORE has a whole QueryResult object you can use! Remember, ADORE is still just
-ADO.NET at heart, so all of the underlying mechanisms of ADO are still there in
-some form. If you just need a data table (or two!), the QueryResult object has
-you covered.
+This first sets up the ad-hoc database connection from the ConnectionLoader
+holding the registered provider factory and database connection needed. This
+database object can be constructed anew every time or cached and reused. Either
+usage is fine. It is thread-safe.
+
+Then it creates the Query for the stored procedure and passes a parameter to it.
+
+Next, it runs the Query and maps its default (that is, first) resultset to a
+list of Genre objects, then gets the first Genre object from the list and
+assigns it to a variable.
+
+Then it updates the Name of the Genre object.
+
+With changes made to the Genre object, a new Query is made to save this data
+back to the database. The Genre object in its entirety is mapped as a set of
+parameters.
+
+Then the new Query is run and the results are mapped to a list of Genre objects
+again, from which the first Genre object is plucked and assigned to a variable.
+
+Notice that the Database, Query, and Genre objects don't need to be disposed.
+That's because they don't persist anything from the database connection outside
+of the actual Run() methods.
+
+But what if you don't have a class to map the results to at all? Well, lucky for
+you, ADORE has a whole QueryResult object you can use! Remember, ADORE is still
+just ADO.NET at heart, so all of the underlying mechanisms of ADO are still
+there in some form. If you just need a data table (or two!), the QueryResult
+object has you covered.
 
 The QueryResult object provides:
 
@@ -400,9 +423,10 @@ The QueryResult object provides:
   returned.
 - A collection of resultsets, with support for named resultsets as well as
   indexed access.
-- Object-mapping facilities to turn resultsets back into strongly-typed objects.
+- Object-mapping facilities to turn resultsets back into collections of
+  strongly-typed objects.
 
-Here's how it works:
+Here's a more feature-rich example:
 
 ```C#
 public class BarThingy(ConnectionLoader cl)
@@ -410,21 +434,36 @@ public class BarThingy(ConnectionLoader cl)
 	public async bool DoStuff()
 	{
 		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
-		var query = adhoc.GetQuery("SELECT TOP 10 * FROM Foo; SELECT TOP 10 * FROM Bar WHERE BazID = @BazID;", new { BazID = 42 });
+		var query = adhoc.GetQuery("SELECT TOP 10 * FROM Genre; SELECT TOP 10 * FROM Song WHERE AlbumID = @AlbumID;", new { AlbumID = 42 });
 		var qresult = await query.RunAsync();
 
 		if(qresult.HasError) { throw qresult.Exception; }
 		if(!qresult.HasResults) { return false; }
 
-		// method "DoStuffWithUnknownData" takes a System.Data.DataTable
-		if(qresult.ResultsCount > 0) { DoStuffWithUnknownData(qresult[0]); }
-		// method "DoStuffWithBarData" takes an IEnumerable<Bar>
-		if(qresult.ResultsCount > 1) { DoStuffWithBarData(qresult.MapResults<Bar>(1)); }
+		// method "DoStuffWithGenreData" takes a System.Data.DataTable
+		if(qresult.ResultsCount > 0) { DoStuffWithGenreData(qresult[0]); }
+		// method "DoStuffWithSongData" takes an IEnumerable<Song>
+		if(qresult.ResultsCount > 1) { DoStuffWithSongData(qresult.MapResults<Song>(1)); }
 
 		return true;
 	}
 }
 ```
+
+This sets up the database, as before.
+
+Then it builds a multi-statement batch query. This will return two resultsets.
+The second query in the batch expects an AlbumID parameter, so that is provided
+in the parameters object list.
+
+When the query is run, it runs asynchronously. And it's not mapped to any object
+structure, but instead comes back as a full QueryResult object. This object can
+encapsulate the results, failures, or error conditions of any query-run. With
+this result, your program can check for an error condition, and re-throw or
+handle the exception as you see fit. It can also provide feedback on whether any
+results were returned, how many were returned, and what the contents of each
+resultset are. These contents can be used in their raw form as a DataTable, or
+they can be mapped to a POCO.
 
 It's a little bit more hassle, and slightly less easy-to-read, when compared to
 the fully fleshed-out idiomatic style. But as ADO.NET programming goes, this is
