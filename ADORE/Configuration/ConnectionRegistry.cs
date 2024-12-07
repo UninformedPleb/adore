@@ -2,8 +2,16 @@
 
 namespace ADORE.Configuration
 {
+	/// <summary>
+	/// <para>Represents a registry of provider and connection configuration data, indexed by name, ready to use on demand.</para>
+	/// <para>This is initialized with values from an AdoreConfig object.</para>
+	/// <para>Barring that, this object can also be initialized manually with RegisterProviders and RegisterConnection(s) methods if the values are obtainable via some other means. This is good for old XML configuration files, CLI-driven configurations, or other sources of data connection information.</para>
+	/// </summary>
 	public class ConnectionRegistry
 	{
+		/// <summary>
+		/// <para>The configuration object containing all of the provider and connection settings</para>
+		/// </summary>
 		public AdoreConfig Config { internal get; init; }
 		internal Dictionary<string, ConnectionStringConfig> ConnectionStrings { get; set; } = new Dictionary<string, ConnectionStringConfig>();
 

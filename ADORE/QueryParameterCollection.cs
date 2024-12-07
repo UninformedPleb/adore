@@ -1,8 +1,13 @@
 ﻿using System.Data;
 using System.Data.Common;
 
+using ADORE.Configuration.Metadata;
+
 namespace ADORE
 {
+	/// <summary>
+	/// <para>Manages a collection of QueryParameter objects and provides bulk mappings as a method of intake.</para>
+	/// </summary>
 	public class QueryParameterCollection
 	{
 		private Dictionary<string,QueryParameter> _parameters = new Dictionary<string, QueryParameter>();
@@ -51,11 +56,16 @@ namespace ADORE
 		}
 		#endregion
 
-		public void Add(QueryParameter param)
-		{
-			_parameters[param.ParameterizedName] = param;
-		}
+		/// <summary>
+		/// <para>Adds a parameter to the collection</para>
+		/// </summary>
+		/// <param name="param">The parameter to add</param>
+		public void Add(QueryParameter param) => _parameters[param.ParameterizedName] = param;
 
+		/// <summary>
+		/// <para>Maps an object's fields and properties into parameters and adds them to the collection</para>
+		/// </summary>
+		/// <param name="param"></param>
 		public void MapObject(object param)
 		{
 			foreach(var field in param.GetType().GetFields())
@@ -63,7 +73,7 @@ namespace ADORE
 				Add(new QueryParameter() {
 					Name = field.Name,
 					Value = field.GetValue(param),
-					Type = QueryParameter.GetDbTypeMapping(field.FieldType),
+					Type = TypeMapSpec.GetDbTypeMapping(field.FieldType),
 					Direction = ParameterDirection.InputOutput,
 				});
 			}
@@ -72,7 +82,7 @@ namespace ADORE
 				Add(new QueryParameter() {
 					Name = prop.Name,
 					Value = prop.GetValue(param),
-					Type = QueryParameter.GetDbTypeMapping(prop.PropertyType),
+					Type = TypeMapSpec.GetDbTypeMapping(prop.PropertyType),
 					Direction = ParameterDirection.InputOutput,
 				});
 			}

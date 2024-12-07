@@ -173,7 +173,8 @@ Stored Procedures:
 ##### Implementing a Table
 
 Tables are POCOs. There's nothing special about them, really. They serve as a
-pre-configured mapping of a single database record.
+pre-configured mapping of a single database record. There's no base classes to
+inherit or magic attributes to decorate everything with. Just POCOs.
 
 Here are some examples:
 

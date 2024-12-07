@@ -5,6 +5,9 @@ using ADORE.Extensions;
 
 namespace ADORE
 {
+	/// <summary>
+	/// <para>Represents a database query.</para>
+	/// </summary>
     public class Query
 	{
 		protected Database _parent;

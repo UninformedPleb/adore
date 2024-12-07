@@ -4,14 +4,20 @@ using System.Data;
 
 namespace ADORE
 {
+	/// <summary>
+	/// <para>Represents a complete result from a Query run.</para>
+	/// </summary>
 	public class QueryResult
 	{
-		public static QueryResult Empty = new QueryResult();
+		/// <summary>
+		/// <para>A blank query result, used for comparison or as a no-op.</para>
+		/// </summary>
+		public static readonly QueryResult Empty = new QueryResult();
 
 		/// <summary>
 		/// <para>The original query string that was run.</para>
 		/// </summary>
-		public string QueryString { get; init; }
+		public string QueryString { get; init; } = string.Empty;
 		/// <summary>
 		/// <para>The query parameters, after the query has run.</para>
 		/// </summary>
@@ -19,7 +25,7 @@ namespace ADORE
 		/// <summary>
 		/// <para>The raw resultsets returned by the query.</para>
 		/// </summary>
-		public DataSet RawResultset { get; internal set; }
+		public DataSet RawResultset { get; internal set; } = null;
 		/// <summary>
 		/// <para>Exception thrown by the Query.</para>
 		/// <para>This will be null if no exception was thrown.</para>
