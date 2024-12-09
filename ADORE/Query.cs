@@ -32,7 +32,10 @@ namespace ADORE
 		public QueryParameterCollection Parameters { get; set; } = new QueryParameterCollection();
 
 		// ctor internal so only Database can make one
-		internal Query(Database parent) { }
+		internal Query(Database parent)
+		{
+			_parent = parent;
+		}
 
 		/// <summary>
 		/// <para>Runs the query.</para>

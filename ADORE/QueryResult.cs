@@ -68,6 +68,9 @@ namespace ADORE
 		/// <returns>The mapped resultset</returns>
 		public IEnumerable<T> MapResults<T>(int index = 0)
 		{
+			// if no results, return null
+			if(!HasResults) { return new List<T>(); }
+
 			// check that index...
 			if(index >= ResultsCount) { throw new ArgumentOutOfRangeException(); }
 
@@ -88,6 +91,9 @@ namespace ADORE
 		/// <returns>The mapped scalar value.</returns>
 		public T MapScalarValue<T>(int index = 0)
 		{
+			// if no results, return null
+			if(!HasResults) { return default(T); }
+
 			// check that index...
 			if(index >= ResultsCount) { throw new ArgumentOutOfRangeException(); }
 

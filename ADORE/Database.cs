@@ -57,6 +57,7 @@ namespace ADORE
 			{
 				for(int x = 0; x < parameterMap.Length; x++)
 				{
+					if(parameterMap[x] is null) { continue; }
 					q.Parameters.MapObject(parameterMap[x]);
 				}
 			}
