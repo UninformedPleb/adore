@@ -8,36 +8,15 @@ namespace ADORETests
 {
 	public class SchemaTest
 	{
-		private readonly AdoreConfig config = new AdoreConfig()
-		{
-			ProviderFactories = new List<ProviderFactoryConfig>() {
-				new ProviderFactoryConfig() {
-					ProviderName = "mockprovider",
-					FactoryTypeName = typeof(MockDbProviderFactory).AssemblyQualifiedName
-				},
-			},
-			ConnectionStrings = new List<ConnectionStringConfig>() {
-				new ConnectionStringConfig() {
-					ConnectionName = "mockconnection",
-					ProviderName = "mockprovider",
-					ConnectionStringValues = new Dictionary<string, string>() {
-						{"Database", "foo"},
-						{"User ID", "bar"},
-						{"Password", "baz"},
-						{"Encryption", "Optional"},
-					}
-				},
-			},
-		};
 		private MockDatabase db;
 
 		public SchemaTest()
 		{
 			// set up providerfactory
-			var cr = new ConnectionRegistry() { Config = config };
+			var cr = new ConnectionRegistry() { Config = MockAdoreConfig.BasicConfig };
 			cr.RegisterProviders();
 			var factory = DbProviderFactories.GetFactory("mockprovider");
-			db = new MockDatabase(factory, config.ConnectionStrings[0].ConnectionString);
+			db = new MockDatabase(factory, MockAdoreConfig.BasicConfig.ConnectionStrings[0].ConnectionString);
 		}
 
 		[Fact]
