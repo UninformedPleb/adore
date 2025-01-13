@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADORETests", "ADORETests\ADORETests.csproj", "{D32D1911-EE5C-491A-99FC-A2D01ED79114}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADORE.Providers.TextFile", "ADORE.Providers.TextFile\ADORE.Providers.TextFile.csproj", "{2B87F445-6C6C-4225-8E27-8C3891FF2D68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADORE.Providers.JsonFile", "ADORE.Providers.JsonFile\ADORE.Providers.JsonFile.csproj", "{BFB18C7C-0750-4696-9F31-EAD65C51109C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{D32D1911-EE5C-491A-99FC-A2D01ED79114}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D32D1911-EE5C-491A-99FC-A2D01ED79114}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D32D1911-EE5C-491A-99FC-A2D01ED79114}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B87F445-6C6C-4225-8E27-8C3891FF2D68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B87F445-6C6C-4225-8E27-8C3891FF2D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B87F445-6C6C-4225-8E27-8C3891FF2D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B87F445-6C6C-4225-8E27-8C3891FF2D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB18C7C-0750-4696-9F31-EAD65C51109C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB18C7C-0750-4696-9F31-EAD65C51109C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB18C7C-0750-4696-9F31-EAD65C51109C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB18C7C-0750-4696-9F31-EAD65C51109C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
