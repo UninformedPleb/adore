@@ -1,0 +1,27 @@
+name: unit_tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ["8"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{matrix.dotnet-version}}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Run tests
+        run: dotnet test --logger trx --results-directory "TestResults-${{matrix.dotnet-version}}"
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-results-${{matrix.dotnet-version}}
+          path: TestResults-${{matrix.dotnet-version}}
+        if: ${{ always() }}

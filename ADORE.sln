@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{19771D5A-5C8C-4279-86B1-7D2EA3F300E0}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\nugetify.yaml = .github\workflows\nugetify.yaml
+		.github\workflows\unit_tests.yaml = .github\workflows\unit_tests.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADORETests", "ADORETests\ADORETests.csproj", "{D32D1911-EE5C-491A-99FC-A2D01ED79114}"
