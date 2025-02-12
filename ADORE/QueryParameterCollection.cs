@@ -68,7 +68,7 @@ namespace ADORE
 		/// <param name="param"></param>
 		public void MapObject(object param)
 		{
-			foreach(var field in param.GetType().GetFields())
+			foreach(var field in param.GetType().GetFields().Where(f => !f.IsInitOnly && !f.IsLiteral && !f.IsStatic))
 			{
 				Add(new QueryParameter() {
 					Name = field.Name,
@@ -77,13 +77,13 @@ namespace ADORE
 					Direction = ParameterDirection.InputOutput,
 				});
 			}
-			foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead))
+			foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead || p.CanWrite))
 			{
 				Add(new QueryParameter() {
 					Name = prop.Name,
 					Value = prop.GetValue(param),
 					Type = TypeMapSpec.GetDbTypeMapping(prop.PropertyType),
-					Direction = ParameterDirection.InputOutput,
+					Direction = prop.CanRead && prop.CanWrite ? ParameterDirection.InputOutput : prop.CanRead ? ParameterDirection.Input : ParameterDirection.Output,
 				});
 			}
 		}
