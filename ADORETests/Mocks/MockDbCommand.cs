@@ -14,7 +14,7 @@ namespace ADORETests.Mocks
 
 		protected override DbParameterCollection DbParameterCollection => throw new NotImplementedException();
 
-		protected override DbTransaction? DbTransaction { get; set; }
+		protected override DbTransaction DbTransaction { get; set; }
 
 		public override void Cancel() { }
 		public override int ExecuteNonQuery() => default(int);
