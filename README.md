@@ -1,36 +1,34 @@
 # ADORE
 
-ADORE is a backronym for ADO is Really Easy.
-
-Originally, I wanted to name this project EZADO, but that's already taken. So
-"ADORE" it is.
+ADORE is a backronym for ADO is Really Easy. (Yes, it's kinda cornball.)
 
 ## Why use ADORE?
 
-Many developers find low-level ADO to be tedious in its out-of-the-box form. 
-You have to manage every connection, every command, every data adapter, and you
-have to make sure you clean up after it all. Nothing is automatic, and 
-everything has some cleanup task or another that needs to be tended to.
+Many developers (myself among them) find low-level ADO to be tedious in its
+out-of-the-box form. You have to manage every connection, every command, every
+data adapter, and you have to make sure you clean up after it all. Nothing is
+automatic, and everything has some cleanup task or another that needs to be
+tended to.
 
-ADORE simplifies ADO code down to its logical operations. Make a connection, 
-get a query on that connection, run that query, then get the result. No more 
-messing around with making sure the connection state is valid or worrying about
-whether you remembered to tie up all of the loose ends afterward.
+ADORE simplifies ADO.NET code down to its logical operations: configure,
+connect, query, get results. No more messing around with making sure the
+connection state is valid or worrying about whether you remembered to dispose
+everything afterward.
 
-## A Little History
+## A Little History - Why Did I Make ADORE?
 
-I started ADORE many years ago, developed its concepts in various commercial
-projects through a couple of decades, and finally gave it a name and used it
-kind of as a tutorial for my personal adoption of Github and Nuget as I broke
-away from older, more "corporate" dev tools. I got it to a semi-tested state,
-then I let it languish for years. I figured it had been supplanted by Dapper.
+I started ADORE many years ago, developed its concepts in various professional
+projects through a couple of decades, and finally gave it a name when I uploaded
+it to Github and Nuget. I got it to a semi-tested state, then let it languish
+for years. I counted it as unnecessary and expected it had been supplanted by
+Dapper.
 
-But as I began to use Dapper in my professional duties, I found that it was
-lacking. It only answers half of the need. Sure, it streamlines the query, but
-it completely ignores the connection. You're on your own for that. And ever
-since the transition from .NET Framework to .NET Core to just-.NET, nobody has
-paid any attention to how to safely, securely, and *simply* wrap the whole
-ADO.NET mechanism.
+But as I used Dapper more and more in my professional duties, I kept wishing for
+features that I had built into ADORE. Mapping query results into domain objects
+is great, but I still had to manually create a connection. And especially since
+the launch of .NET Core, any simplicity that ADO.NET might have had is gone.
+Cross-platform concerns had dismantled things like DbProviderFactories, and few
+if any engineering efforts had been made to put it back.
 
 ## How to use ADORE
 
@@ -39,14 +37,13 @@ ADO.NET mechanism.
 #### Configure Providers
 
 The first step in any project that uses ADORE, or really ADO.NET, is to
-establish the database providers, the code that will handle each different DBMS
-in its own special way. Or, if there isn't a specific provider, the ODBC driver
-can be used.
+establish the database providers. They're the part that will handle each DBMS
+according to its quirks.
 
 For modern .NET, you're responsible for the registration of database providers.
-These "providers" are the database access assemblies, like
-Microsoft.Data.SqlClient or Npgsql. This part of ADORE is configuration-driven.
-Simply add the providers to your all-environments config.
+These "providers" are the database access assemblies, like Npgsql or
+Microsoft.Data.SqlClient. This part of ADORE is configuration-driven. Simply add
+the providers to your all-environments config.
 
 ```JSON
 "ADORE": {
@@ -129,46 +126,13 @@ builder.Services.RegisterDatabase<MusicLibraryDatabase>("musiclibrary");
 You can use ADORE without fully integrating it. There's an AdHocDatabase that
 can provide basic one-off access to everything you need to run a quick query.
 But ADORE is designed to be much more than that. If you use its features to the
-full, it will make your database code seamlessly idiomatic with both SQL and
+full, it can make your database code seamlessly idiomatic with both SQL and
 .NET.
 
 #### Integrating ADORE Into Your Codebase
 
 To use ADORE as it is intended, you'll need to implement your database structure
 as implementations of the Database, Schema, and Query classes.
-
-##### Examples In This Section
-
-Examples in this section will be built around the following database structure:
-
-Database:
-- MusicLibrary (MSSQLServer)
-
-Schemas:
-- dbo (the default schema for SQL Server)
-- metadata
-
-Tables:
-- dbo.Song (SongID, AlbumID, GenreID, Name)
-- dbo.Artist (ArtistID, Name)
-- dbo.Performance (SongID, ArtistID, PerformanceDate, Instrument)
-- dbo.Album (AlbumID, Name, Publisher, CoverArtwork)
-- metadata.Genre (GenreID, Name)
-
-Stored Procedures:
-- dbo.Song_Load
-- dbo.Song_Save
-- dbo.Song_GetPerformances
-- dbo.Artist_Load
-- dbo.Artist_Save
-- dbo.Artist_GetPerformances
-- dbo.Performance_Load
-- dbo.Perforamnce_Save
-- dbo.Album_Load
-- dbo.Album_Save
-- dbo.Album_GetSongs
-- metadata.Genre_Load
-- metadata.Genre_Save
 
 ##### Implementing a Table
 
@@ -216,10 +180,9 @@ provides simple equality semantics. Which you choose is up to you.
 ##### Implementing a Schema
 
 A schema groups database objects (tables, views, stored procedures, functions,
-and other things) under a name and allow for security settings to be applied to
-all of them as a group. But since these security settings aren't part of our
-application's code, it's best just to think of schemas as roughly equivalent to
-a namespace.
+and other things) under a name and allows for security settings to be applied
+as a group. But since these security settings aren't part of our application's
+code, schemas are easy to treat like a namespace.
 
 To represent a database schema, ADORE provides the Schema base class for you to
 extend like this:
@@ -227,28 +190,9 @@ extend like this:
 ```C#
 public class MetadataSchema : Schema
 {
-```
-
-First, we need a constructor. These don't really do much beyond attaching this
-instance of the class to its parent Database.
-
-```C#
 	public MetadataSchema(Database parent) : base(parent) { }
-```
-
-Next, we have to implement the Name property getter that the base class expects.
-It uses this to make sure the procedure name specifies the schema. This does NOT
-prevent you from manually adding a different schema's procedure to this schema
-class.
-
-```C#
 	public override string Name { get => "metadata"; }
-```
 
-Now, you can make methods to create idiomatic stored procedures. This may seem
-like a waste of time, but later, the benefits will be clear.
-
-```C#
 	public async Genre LoadGenre(int id)
 	{
 		var proc = CreateStoredProcedure("Genre_Load", new { GenreID = id });
@@ -259,14 +203,18 @@ like a waste of time, but later, the benefits will be clear.
 		var proc = CreateStoredProcedure("Genre_Save", genre);
 		return (await proc.Run<Genre>()).First();
 	}
-```
-
-Do that for all of the stored procs in the schema, and the schema class is
-complete.
-
-```C#
 }
 ```
+
+First is the constructor. The main purpose is to attach this instance to its
+parent Database.
+
+Next comes the Name property. The base class expects the getter to be
+implemented so it can include the schema scope when it's needed. But you can
+always add a different schema's procedure to a schema class if you want.
+
+Next are the methods to call stored procedures. This optional syntax makes
+data access code clear and idiomatic.
 
 ##### Implementing a Database
 
@@ -276,55 +224,38 @@ represents the database.
 ```C#
 public class MusicLibraryDatabase : Database
 {
-```
-
-First, the database needs its schema instance properties.
-
-NOTE: If you follow the usual naming styles for SQL Server, these will be
-lower-case public properties. Automated code analysis will probably complain
-about this. To sidestep the robotic style police, apply a
-SuppressMessageAttribute to these if you wish.
-
-```C#
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
 	public DboSchema dbo { get; private set; }
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
 	public MetadataSchema metadata { get; private set; }
-```
 
-Next, the constructor. It anchors our database object to its provider factory
-and connection string. It also initializes the schema instances.
-
-```C#
 	public MusicLibraryDatabase(DbProviderFactory factory, string connectionString) : base(factory, connectionString)
 	{
 		this.dbo = new DboSchema(this);
 		this.metadata = new MetadataSchema(this);
 	}
+}
 ```
+
+First, the database defines members for each of its schemas. These can be
+flagged with the SuppressMessageAttribute, as seen above, if you use strict
+naming convention rules. Of course, there's no requirement that these be
+named exactly as they are in the database. It's just a suggestion.
+
+Next is the constructor. It anchors our database object to its provider factory
+and connection string. It also initializes the schema instances.
 
 With that, the database class contains a ready-to-use instance of each of its
 schemas and is complete.
 
-```
-}
-```
-
 ##### Putting It All Together
 
-To use it via DI, simply put a database object into the constructor of your
-DI-participating classes to initialize it. To retrieve data from it, the
-database instance from DI provides access to the schema, which then provides
-access to the stored procedures and other queries. Calling a stored procedure is
-as simple as database.schema.storedProc(parameter1, parameter2).
+To use the database via DI, put it into the constructor of your DI-participating
+classes. Retrieving data is as simple as calling the methods you've added to the
+schema.
 
 The example below shows how the Genre object can be retrieved from LoadGenre(),
 then updated in-place, then saved back to the database with SaveGenre().
-
-NOTE: This example expects the Genre_Save stored procedure to be written as an
-upsert that returns its upserted record, meaning that the return value from
-SaveGenre() is the current state of the record that just got loaded, modified,
-and saved.
 
 ```C#
 public class FooThingy
@@ -348,28 +279,26 @@ public class FooThingy
 }
 ```
 
-Setting things up this way, the semantics match the database structure.
-
-This also lends itself to being templated or generated.
+By setting things up this way, the semantics match the database structure. It's
+also easily templated or generated.
 
 #### Unintegrated Use
 
-All of that structure is great, but what if you just need to run a quick query?
-That, too, is available via the AdHocDatabase. AdHocDatabase is a sealed class
-that exposes the base-level Database methods CreateQuery and
-CreateStoredProcedure. If you don't need the structure outlined above, or if you
-just don't want it, here's how to use ADORE with all of the same object-mapping
-facilities, minus the overhead of enforcing any particular code structure.
+Q: But what if you just need to run a query and don't want so much formal code?
 
-We can do the same thing as before, but without DI, without database, schema,
-and table classes, and without any pre-defined structure. All you need is a
-provider factory, a connection string, and work to do!
+A: Use the AdHocDatabase. AdHocDatabase is a pre-made class that exposes the
+basic Database methods CreateQuery and CreateStoredProcedure.
 
-This example shows that you can still use a table class (or any POCO):
+Here's how to use ADORE with all of the same features, but without the overhead
+of maintaining a bunch of code structure. The following example does the same
+thing as before, but without custom database and schema classes and without
+mirroring a pre-defined database structure. It just needs some configuration.
 
 ```C#
 public class FooThingy(ConnectionLoader cl)
 {
+	// NOTE: the ConnectionLoader is initialized with the DI setup shown earlier.
+
 	public void DoStuff()
 	{
 		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
@@ -382,10 +311,10 @@ public class FooThingy(ConnectionLoader cl)
 }
 ```
 
-This first sets up the ad-hoc database connection from the ConnectionLoader
-holding the registered provider factory and database connection needed. This
-database object can be constructed anew every time or cached and reused. Either
-usage is fine. It is thread-safe.
+This starts with the ad-hoc database connection from the provider and connection
+string information registered in the ConnectionLoader. This ad-hoc database
+object can be constructed anew every time or cached and reused. Either usage is
+fine. It is thread-safe.
 
 Then it creates the Query for the stored procedure and passes a parameter to it.
 
@@ -396,25 +325,25 @@ assigns it to a variable.
 Then it updates the Name of the Genre object.
 
 With changes made to the Genre object, a new Query is made to save this data
-back to the database. The Genre object in its entirety is mapped as a set of
-parameters.
+back to the database. The Genre object, in its entirety, is mapped as a set of
+parameters for this new query.
 
 Then the new Query is run and the results are mapped to a list of Genre objects
 again, from which the first Genre object is plucked and assigned to a variable.
 
 Notice that the Database, Query, and Genre objects don't need to be disposed.
 That's because they don't persist anything from the database connection outside
-of the actual Run() methods.
+of the actual Run() and RunAsync() methods.
 
 But what if you don't have a class to map the results to at all? Well, lucky for
 you, ADORE has a whole QueryResult object you can use! Remember, ADORE is still
 just ADO.NET at heart, so all of the underlying mechanisms of ADO are still
-there in some form. If you just need a data table (or two!), the QueryResult
-object has you covered.
+there, out of sight, out of mind. If you just need a data table (or two!), the
+QueryResult object has you covered.
 
 The QueryResult object provides:
 
-- A copy of the query that produced this result
+- A copy of the query that produced this result.
 - A copy of the Parameters used to run the query.
 - HasError and Exception parameters to facilitate error handling. This has a
   side-effect of preventing database engine errors from being uncaught and
@@ -423,48 +352,26 @@ The QueryResult object provides:
   returned.
 - A collection of resultsets, with support for named resultsets as well as
   indexed access.
-- Object-mapping facilities to turn resultsets back into collections of
+- Object-mapping facilities to map resultsets into collections of
   strongly-typed objects.
 
-Here's a more feature-rich example:
+These tools provide the flexibility to work with databases on your terms. They
+make ADO Really Easy.
 
-```C#
-public class BarThingy(ConnectionLoader cl)
-{
-	public async bool DoStuff()
-	{
-		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
-		var query = adhoc.GetQuery("SELECT TOP 10 * FROM Genre; SELECT TOP 10 * FROM Song WHERE AlbumID = @AlbumID;", new { AlbumID = 42 });
-		var qresult = await query.RunAsync();
+## Feature Roadmap
 
-		if(qresult.HasError) { throw qresult.Exception; }
-		if(!qresult.HasResults) { return false; }
-
-		// method "DoStuffWithGenreData" takes a System.Data.DataTable
-		if(qresult.ResultsCount > 0) { DoStuffWithGenreData(qresult[0]); }
-		// method "DoStuffWithSongData" takes an IEnumerable<Song>
-		if(qresult.ResultsCount > 1) { DoStuffWithSongData(qresult.MapResults<Song>(1)); }
-
-		return true;
-	}
-}
-```
-
-This sets up the database, as before.
-
-Then it builds a multi-statement batch query. This will return two resultsets.
-The second query in the batch expects an AlbumID parameter, so that is provided
-in the parameters object list.
-
-When the query is run, it runs asynchronously. And it's not mapped to any object
-structure, but instead comes back as a full QueryResult object. This object can
-encapsulate the results, failures, or error conditions of any query-run. With
-this result, your program can check for an error condition, and re-throw or
-handle the exception as you see fit. It can also provide feedback on whether any
-results were returned, how many were returned, and what the contents of each
-resultset are. These contents can be used in their raw form as a DataTable, or
-they can be mapped to a POCO.
-
-It's a little bit more hassle, and slightly less easy-to-read, when compared to
-the fully fleshed-out idiomatic style. But as ADO.NET programming goes, this is
-easy. Because ADORE makes **ADO** **R**eally **E**asy.
+- Text-file database providers (JSON, XML, CSV)
+  - ADO.NET read operations
+  - Schema detection
+  - ADO.NET write operations
+- Non-remote query parsing, compiled down to LINQ operations
+  - Parsing support for:
+    - XPath
+    - JSONPath
+    - GraphQL
+- Code generation
+  - From SQL, using INFORMATION_SCHEMA and/or sys
+  - From text-file schemas
+- Automatic IDistributedCache management
+  - Per-entity lifetime configuration
+  - Conditional cache overrides
