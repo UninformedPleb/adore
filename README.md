@@ -1,50 +1,47 @@
 # ADORE
-
-ADORE is a backronym for ADO is Really Easy. (Yes, it's kinda cornball.)
+ADORE is a backronym for **ADO** is **R**eally **E**asy. Yes, it's kinda corny,
+but it states the project's overall goal quite nicely.
 
 ## Why use ADORE?
+Many developers find low-level ADO.NET to be tedious. I can't really blame them.
+Every connection, every command, every data adapter has to be managed and
+cleaned up by *you*. Nothing is automatic or easy.
 
-Many developers (myself among them) find low-level ADO to be tedious in its
-out-of-the-box form. You have to manage every connection, every command, every
-data adapter, and you have to make sure you clean up after it all. Nothing is
-automatic, and everything has some cleanup task or another that needs to be
-tended to.
+ADORE simplifies ADO.NET by using configurations to pre-initialize much of the
+boilerplate stuff for you. After it's configured and you call the built-in
+initialization, all you have to do is use a Database to make a Query and run it.
 
-ADORE simplifies ADO.NET code down to its logical operations: configure,
-connect, query, get results. No more messing around with making sure the
-connection state is valid or worrying about whether you remembered to dispose
-everything afterward.
+Of course, there are also additional features that can help you to keep a large
+project organized. You can build a repository-pattern library with ease. It even
+lends itself well to code-generation. Check the roadmap for features being
+planned for future releases.
 
-## A Little History - Why Did I Make ADORE?
-
-I started ADORE many years ago, developed its concepts in various professional
-projects through a couple of decades, and finally gave it a name when I uploaded
-it to Github and Nuget. I got it to a semi-tested state, then let it languish
-for years. I counted it as unnecessary and expected it had been supplanted by
-Dapper.
-
-But as I used Dapper more and more in my professional duties, I kept wishing for
-features that I had built into ADORE. Mapping query results into domain objects
-is great, but I still had to manually create a connection. And especially since
-the launch of .NET Core, any simplicity that ADO.NET might have had is gone.
-Cross-platform concerns had dismantled things like DbProviderFactories, and few
-if any engineering efforts had been made to put it back.
+## Feature Roadmap
+- Text-file database providers (JSON, XML, CSV)
+  - ADO.NET read operations
+  - Schema detection
+  - ADO.NET write operations
+- Non-remote query parsing, compiled down to LINQ operations
+  - Parsing support for:
+    - XPath
+    - JSONPath
+    - GraphQL
+- Code generation
+  - From SQL, using INFORMATION_SCHEMA and/or sys
+  - From text-file schemas
+- Automatic IDistributedCache management
+  - Per-entity lifetime configuration
+  - Conditional cache overrides and bypasses
 
 ## How to use ADORE
+### Configure Providers
+The first step is to establish the database providers. ADO.NET uses the provider
+pattern so each database engine can be used the same way despite their internal
+differences. Old .NET used to configure the most common providers for you, but
+now you're responsible for registering these libraries.
 
-### Getting Started
-
-#### Configure Providers
-
-The first step in any project that uses ADORE, or really ADO.NET, is to
-establish the database providers. They're the part that will handle each DBMS
-according to its quirks.
-
-For modern .NET, you're responsible for the registration of database providers.
-These "providers" are the database access assemblies, like Npgsql or
-Microsoft.Data.SqlClient. This part of ADORE is configuration-driven. Simply add
-the providers to your all-environments config.
-
+ADORE has its own configuration section defined so you can add these to your
+all-environments configuration, like this:
 ```JSON
 "ADORE": {
 	"ProviderFactories": [
@@ -60,318 +57,277 @@ the providers to your all-environments config.
 }
 ```
 
-ADORE will automatically register the providers in ADORE:ProviderFactories when
-you add it to your services collection.
-
-#### Configure Connection Strings
-
-With the providers established, now it's time to configure the connections that
-use those providers. This should be added to your per-environment config.
-
+### Configure Connection Strings
+Connection strings are also part of the ADORE configuration section. These most
+likely belong in the per-environment configuration files:
 ```JSON
 "ADORE": {
 	"ConnectionStrings": [
 		{
-			"ConnectionName": "musiclibrary",
+			"ConnectionName": "customdb",
 			"ProviderName": "MSSQLServer",
 			"ConnectionStringValues": {
-				"Server": "HOSTNAME_OR_IP_ADDRESS",
-				"Database": "DATABASE_CATALOG_NAME",
+				"Server": "customdb.example.com",
+				"Database": "Stuff",
 				"User ID": "USERNAME",
 				"Encrypt": "Optional",
 				"TrustServerCertificate": "True"
+			}
+		},
+		{
+			"ConnectionName": "anotherdb",
+			"ProviderName": "Postgres",
+			"ConnectionStringValues": {
+				"Server": "10.10.10.10",
+				"Port": "5432",
+				"Database": "whatever",
+				"Uid": "USERNAME"
 			}
 		}
 	]
 }
 ```
 
-And your secrets file or secure keystore should have:
-
+And don't forget that you should *never* store passwords in plaintext. Your
+secrets file (for local development) or secure keystore (for higher
+environments) should store sensitive keys like this:
 ```JSON
 "ADORE": {
-	"ConnectionStrings": {
-		"ConnectionStringValues": {
-			"Password": YOUR_PASSWORD_HERE
+	"ConnectionStrings": [
+		{
+			"ConnectionStringValues": {
+				"Password": "YOUR_PASSWORD_HERE"
+			}
+		},
+		{
+			"ConnectionStringValues": {
+				"Pwd": "YOUR_PASSWORD_HERE"
+			}
 		}
-	}
+	]
 }
 ```
 
-#### Configure ADORE
-
-Next, ADORE needs to register everything. This one step will take care of all of
-the provider factories, the connection strings, and any other configuration
-values that are needed to persist ADORE throughout the lifetime of your app. It
-will even register the AdoreConfig into the DI system.
-
+### Startup
+Most modern .NET applications use a builder pattern to start up an application.
+The default behavior is to use Microsoft's dependency injection (DI) system.
+ADORE is built to embrace this style. Using it, you need only one line of code:
 ```C#
 builder.ConfigureAdore(builder.Configuration.GetSection("ADORE").Get<AdoreConfig>());
 ```
+With this, the AdoreConfig and the ADORE ConnectionRegistry are registered into
+DI, ADO.NET providers are registered into DbProviderFactories, and connection
+strings are loaded into the ConnectionRegistry.
 
-With this, all configured connections are available to be mapped to a Database
-class object.
-
-#### Register Databases
-
-Each of the classes you make to correspond to a database (catalog) should be
-set-up in DI. It will look something like this:
-
+If you choose not to use a builder or DI, or if your project type does not
+support one, the ConnectionRegistry can be initialized manually this way:
 ```C#
-builder.Services.RegisterDatabase<MusicLibraryDatabase>("musiclibrary");
+AdoreConfig config = ... // manually build this or read it from a file
+ConnectionRegistry cr = new() { Configuration = config };
+cr.RegisterProviders();
+cr.RegisterConnections();
+```
+This ConnectionRegistry is needed whenever you instantiate a new ADORE database,
+so you might want to keep it around for the lifetime of your application.
+
+### Databases, Catalogs, and Schemas
+A database, sometimes called a catalog, is represented by an object derived from
+ADORE's Database class. You can derive your own databases or you can use the
+built-in AdHocDatabase class.
+
+If you derive your own databases, they will contain the code to reference that
+database's objects, such as schemas, stored procedures, functions, or even
+in-application processing that is specific to that database. These are really
+just a convenience and some syntactic sugar. And they're a convenient way to
+give code generators a place to put their code.
+
+The main purpose of *every* Database, including the AdHocDatabase, is:
+- To keep a reference to the DbProviderFactory for its DBMS.
+- To keep a reference to the connection string needed to access the DBMS.
+- To produce Query objects that can be run against the DBMS.
+
+Once you've implemented your Databases or decided to use the AdHocDatabase, you
+register them into DI like this:
+```C#
+builder.Services.RegisterDatabase<MyCustomDatabase>("customdb");
+builder.Services.RegisterDatabase<AdHocDatabase>("anotherdb");
+```
+The generic type parameter is the Database-derived type, and the name passed to
+the method is the ConnectionName of its connection string.
+
+Without DI, you will need to do a little more legwork. The ConnectionRegistry
+has the DbProviderFactory and connection string already, so it looks more like
+this:
+```C#
+var customdb = cr["customdb"];
+MyCustomDatabase mydb = new(customdb.factory, customdb.config.ConnectionString);
+var anotherdb = cr["anotherdb"];
+AdHocDatabase adhoc = new(anotherdb.factory, anotherdb.config.ConnectionString);
 ```
 
-### Using ADORE
+ADORE also maintains the concept of a Schema. Not all database engines use them.
+But the ones that do can use it as a pseudo-namespace for functions and stored
+procedures, as well as a security group. Like Databases, Schemas are made to
+contain code that sends and retrieves data.
 
-You can use ADORE without fully integrating it. There's an AdHocDatabase that
-can provide basic one-off access to everything you need to run a quick query.
-But ADORE is designed to be much more than that. If you use its features to the
-full, it can make your database code seamlessly idiomatic with both SQL and
-.NET.
+### Queries and Results
+Once you have a Database object, you're ready to start making and running
+queries. A query is any text-based series of instructions that can be
+interpreted as a way to locate a specific set of data in a database. ADORE makes
+no distinctions between queries that retrieve data and those that make changes
+to a database. All of them use the Query class.
 
-#### Integrating ADORE Into Your Codebase
-
-To use ADORE as it is intended, you'll need to implement your database structure
-as implementations of the Database, Schema, and Query classes.
-
-##### Implementing a Table
-
-Tables are POCOs. There's nothing special about them, really. They serve as a
-pre-configured mapping of a single database record. There's no base classes to
-inherit or magic attributes to decorate everything with. Just POCOs.
-
-Here are some examples:
-
+A Query is created by a Database, and is only usable within the Database that
+created it. A Schema can also create Query objects for its parent Database. To
+make a Query, simply do this:
 ```C#
-public class Song
-{
-	public int SongID { get; set; }
-	public int AlbumID { get; set; }
-	public int GenreID { get; set; }
-	public string Name { get; set; }
-}
+var query = mydb.CreateQuery("SELECT * FROM Products WHERE Color = 'red'");
+```
+This will retrieve a list of products with the value "red" in their Color
+column.
 
-public class Artist
-{
-	public int ArtistID { get; set; }
-	public string Name { get; set; }
-}
-
-public class Album
-{
-	public int AlbumID { get; set; }
-	public string Name { get; set; }
-	public string Publisher { get; set; }
-	public byte[] CoverArtwork { get; set; }
-}
+But what if you want the user to select the color? Set a parameter. Assuming the
+color is stored in the `userColor` variable, you would do this:
+```C#
+var query = mydb.CreateQuery("SELECT * FROM Products WHERE Color = @Color", new { Color = userColor });
+```
+Some database providers, such as ODBC, do not support named parameters. For
+those, you can do this:
+```C#
+var query = mydb.CreateQuery("SELECT * FROM Products WHERE Color = ?", userColor);
 ```
 
-Alternatively, you could use a record type instead:
-
+So now you have a query, but how do you actually get results? You have to *run*
+the query.
 ```C#
-public record Performance(int SongID, int ArtistID, DateTime PerformanceDate, string Instrument);
-public record Genre(int GenreID, string Name);
+var results = query.Run();
 ```
+Query.Run() handles all of the connection, command, parameters, and other
+technical minutiae for you and returns a QueryResult. What's a QueryResult? It's
+an object that contains *all* of the results, statuses, errors, and anything
+else returned by the DBMS running the query.
 
-The class would allow you to add methods to it if you wanted to, while that
-wouldn't be possible with the record. But the record enforces immutability and
-provides simple equality semantics. Which you choose is up to you.
-
-##### Implementing a Schema
-
-A schema groups database objects (tables, views, stored procedures, functions,
-and other things) under a name and allows for security settings to be applied
-as a group. But since these security settings aren't part of our application's
-code, schemas are easy to treat like a namespace.
-
-To represent a database schema, ADORE provides the Schema base class for you to
-extend like this:
-
-```C#
-public class MetadataSchema : Schema
-{
-	public MetadataSchema(Database parent) : base(parent) { }
-	public override string Name { get => "metadata"; }
-
-	public async Genre LoadGenre(int id)
-	{
-		var proc = CreateStoredProcedure("Genre_Load", new { GenreID = id });
-		return (await proc.Run<Genre>()).First();
-	}
-	public async Genre SaveGenre(Genre genre)
-	{
-		var proc = CreateStoredProcedure("Genre_Save", genre);
-		return (await proc.Run<Genre>()).First();
-	}
-}
-```
-
-First is the constructor. The main purpose is to attach this instance to its
-parent Database.
-
-Next comes the Name property. The base class expects the getter to be
-implemented so it can include the schema scope when it's needed. But you can
-always add a different schema's procedure to a schema class if you want.
-
-Next are the methods to call stored procedures. This optional syntax makes
-data access code clear and idiomatic.
-
-##### Implementing a Database
-
-Now that we have tables and schemas, we can put them all into an object that
-represents the database.
-
-```C#
-public class MusicLibraryDatabase : Database
-{
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
-	public DboSchema dbo { get; private set; }
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
-	public MetadataSchema metadata { get; private set; }
-
-	public MusicLibraryDatabase(DbProviderFactory factory, string connectionString) : base(factory, connectionString)
-	{
-		this.dbo = new DboSchema(this);
-		this.metadata = new MetadataSchema(this);
-	}
-}
-```
-
-First, the database defines members for each of its schemas. These can be
-flagged with the SuppressMessageAttribute, as seen above, if you use strict
-naming convention rules. Of course, there's no requirement that these be
-named exactly as they are in the database. It's just a suggestion.
-
-Next is the constructor. It anchors our database object to its provider factory
-and connection string. It also initializes the schema instances.
-
-With that, the database class contains a ready-to-use instance of each of its
-schemas and is complete.
-
-##### Putting It All Together
-
-To use the database via DI, put it into the constructor of your DI-participating
-classes. Retrieving data is as simple as calling the methods you've added to the
-schema.
-
-The example below shows how the Genre object can be retrieved from LoadGenre(),
-then updated in-place, then saved back to the database with SaveGenre().
-
-```C#
-public class FooThingy
-{
-	private ILogger _logger;
-	private MusicLibraryDatabase _mldb;
-
-	public FooThingy(ILogger logger, MusicLibraryDatabase mldb)
-	{
-		_logger = logger;
-		_mldb = mldb;
-	}
-
-	public void DoStuff()
-	{
-		var genre = _mldb.metadata.LoadGenre(27); // magic number is magic... it's an example, okay?
-		genre.Name = "Blah";
-		genre = _mldb.metadata.SaveGenre(genre);
-		_logger.LogInformation($"did stuff. genre: {genre.GenreID}, {genre.Name}");
-	}
-}
-```
-
-By setting things up this way, the semantics match the database structure. It's
-also easily templated or generated.
-
-#### Unintegrated Use
-
-Q: But what if you just need to run a query and don't want so much formal code?
-
-A: Use the AdHocDatabase. AdHocDatabase is a pre-made class that exposes the
-basic Database methods CreateQuery and CreateStoredProcedure.
-
-Here's how to use ADORE with all of the same features, but without the overhead
-of maintaining a bunch of code structure. The following example does the same
-thing as before, but without custom database and schema classes and without
-mirroring a pre-defined database structure. It just needs some configuration.
-
-```C#
-public class FooThingy(ConnectionLoader cl)
-{
-	// NOTE: the ConnectionLoader is initialized with the DI setup shown earlier.
-
-	public void DoStuff()
-	{
-		var adhoc = new AdHocDatabase(cl.GetFactory("musiclibrary"), cl.GetDatabaseConnection("musiclibrary"));
-		var query = adhoc.GetStoredProcedure("metadata.Genre_Load", new { GenreID = 27 });
-		var genre = query.Run<Genre>().First();
-		genre.Name = "Blah";
-		query = adhoc.GetStoredProcedure("metadata.Genre_Save", genre);
-		genre = query.Run<Genre>().First();
-	}
-}
-```
-
-This starts with the ad-hoc database connection from the provider and connection
-string information registered in the ConnectionLoader. This ad-hoc database
-object can be constructed anew every time or cached and reused. Either usage is
-fine. It is thread-safe.
-
-Then it creates the Query for the stored procedure and passes a parameter to it.
-
-Next, it runs the Query and maps its default (that is, first) resultset to a
-list of Genre objects, then gets the first Genre object from the list and
-assigns it to a variable.
-
-Then it updates the Name of the Genre object.
-
-With changes made to the Genre object, a new Query is made to save this data
-back to the database. The Genre object, in its entirety, is mapped as a set of
-parameters for this new query.
-
-Then the new Query is run and the results are mapped to a list of Genre objects
-again, from which the first Genre object is plucked and assigned to a variable.
-
-Notice that the Database, Query, and Genre objects don't need to be disposed.
-That's because they don't persist anything from the database connection outside
-of the actual Run() and RunAsync() methods.
-
-But what if you don't have a class to map the results to at all? Well, lucky for
-you, ADORE has a whole QueryResult object you can use! Remember, ADORE is still
-just ADO.NET at heart, so all of the underlying mechanisms of ADO are still
-there, out of sight, out of mind. If you just need a data table (or two!), the
-QueryResult object has you covered.
-
-The QueryResult object provides:
-
-- A copy of the query that produced this result.
+The QueryResult contains:
+- A copy of the query text that produced this result.
 - A copy of the Parameters used to run the query.
 - HasError and Exception parameters to facilitate error handling. This has a
   side-effect of preventing database engine errors from being uncaught and
   bubbling up into calling code.
 - HasResults provides feedback about whether any resultsets were successfully
   returned.
-- A collection of resultsets, with support for named resultsets as well as
-  indexed access.
+- A collection of resultsets, with support for access to resultsets by name and
+  zero-indexed number.
 - Object-mapping facilities to map resultsets into collections of
   strongly-typed objects.
 
-These tools provide the flexibility to work with databases on your terms. They
-make ADO Really Easy.
+So back to the example, how do you get the Product data from the QueryResult?
+Well, since there was only one statement in the query's text, the result of that
+SELECT will be the first result in the set. The following gets the first ADO.NET
+DataTable in the result.
+```C#
+var resultTable = results[0];
+```
+You might want to use that DataTable directly, or you might want to bind it to
+something that already plays nice with ADO.NET. But what if you're writing
+something a little more modern, and you want a collection of objects? Well,
+assuming you made a Product object with the same structure as the Product table:
+```C#
+var products = results.MapResults<Product>();
+```
+Of course, it would be nice if we didn't have to get results first, then map
+them to a collection. Most of the time, we don't need all of the features of the
+QueryResult object. So that's an option too:
+```C#
+var products = query.Run<Product>();
+```
 
-## Feature Roadmap
+Once again, ADORE makes ADO Really Easy.
 
-- Text-file database providers (JSON, XML, CSV)
-  - ADO.NET read operations
-  - Schema detection
-  - ADO.NET write operations
-- Non-remote query parsing, compiled down to LINQ operations
-  - Parsing support for:
-    - XPath
-    - JSONPath
-    - GraphQL
-- Code generation
-  - From SQL, using INFORMATION_SCHEMA and/or sys
-  - From text-file schemas
-- Automatic IDistributedCache management
-  - Per-entity lifetime configuration
-  - Conditional cache overrides
+## Getting the Most Out of ADORE
+You can use ADORE without fully integrating it. There's an AdHocDatabase that
+can provide basic one-off access to everything you need to run a quick query.
+But ADORE really shines when you use its structured Database and Schema
+classes to the full. It can make your database code seamlessly idiomatic with
+both SQL and .NET.
+
+### Implementing a Schema (Optional)
+A schema groups database objects (tables, views, stored procedures, functions,
+and other things) under a name and allows for security settings to be applied
+as a group. But since these security settings aren't part of our application's
+code, schemas treated mostly as a namespace.
+
+To represent a database schema, ADORE provides the Schema base class for you to
+extend like this:
+```C#
+public class MetadataSchema : Schema
+{
+	public MetadataSchema(Database parent) : base(parent) { }
+	public override string Name { get => "metadata"; }
+
+	public async ProductType? LoadProductType(int id)
+	{
+		var proc = CreateStoredProcedure("LoadProductType", new { ProductTypeID = id });
+		return (await proc.RunAsync<ProductType>()).FirstOrDefault();
+	}
+	public async ProductType SaveProductType(ProductType pt)
+	{
+		var proc = CreateStoredProcedure("SaveProductType", pt);
+		return (await proc.RunAsync<ProductType>()).First();
+	}
+}
+```
+The things it needs are prety simple:
+- **The constructor**: It ties this schema instance to its parent Database.
+- **The Name property getter**: The Schema base class uses this to inject the schema
+name into the query text to disambiguate this schema's stored procedures from
+other schemas stored procedures. Some databases can be strict about this, so
+ADORE is always strict about it.
+- **Methods to represent stored procedures**: This makes the stored procedures feel
+idiomatic when called by your application's code.
+
+### Implementing a Database
+The database is the glue that holds all of the schemas together. It also serves
+as a sort of "root" for everything relating to a given database's structure.
+```C#
+public class StuffDatabase : Database
+{
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
+	public DboSchema dbo { get; private set; }
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matches database naming conventions")]
+	public MetadataSchema metadata { get; private set; }
+
+	public StuffDatabase(DbProviderFactory factory, string connectionString) : base(factory, connectionString)
+	{
+		this.dbo = new DboSchema(this);
+		this.metadata = new MetadataSchema(this);
+	}
+}
+```
+This one is even simpler than the Schema:
+- **Member schemas**: These are instances of the schemas in this database. They
+can be flagged with the SuppressMessageAttribute, as seen above, if you need to
+bypass strict naming convention rules. Of course, there's no requirement that
+these be named exactly as they are in the database. It's just a suggestion.
+- **The constructor:** It anchors our database object to its provider factory
+and connection string. It also initializes the schema instances.
+
+This is the class that would be registered with the DI container.
+
+### Putting It All Together
+To use the database via DI, put it into the constructor of your DI-participating
+classes. Retrieving data is as simple as calling the methods you've added to the
+schema.
+```C#
+public class FooThingy(ILogger _logger, StuffDatabase _stuffdb)
+{
+	public void DoStuff()
+	{
+		var ptype = _stuffdb.metadata.LoadProductType(27); // magic number is magic... it's an example, okay?
+		ptype.Name = "Blah";
+		ptype = _stuffdb.metadata.SaveProductType(ptype);
+		_logger.LogInformation($"did stuff. product type: {ptype.ProductTypeID}, {ptype.Name}");
+	}
+}
+```
+By setting things up this way, the semantics match the database structure. It's
+also easily templated or generated.

@@ -16,6 +16,14 @@ namespace ADORE.Configuration
 		internal Dictionary<string, ConnectionStringConfig> ConnectionStrings { get; set; } = new Dictionary<string, ConnectionStringConfig>();
 
 		/// <summary>
+		/// <para>Gets the factory and connection string config associated to the connection name provided.</para>
+		/// </summary>
+		/// <param name="key">The connection name</param>
+		/// <returns><para>Tuple containing a factory and a config.</para></returns>
+		public (DbProviderFactory factory, ConnectionStringConfig config) this[string key] { get => (factory: GetFactory(key), config: GetDatabaseConnection(key)); }
+
+		#region provider management
+		/// <summary>
 		/// <para>Registers multiple providers from ProviderFactoryConfigs</para>
 		/// </summary>
 		/// <param name="providers">The list of ProviderFactoryConfigs to register</param>
@@ -40,7 +48,9 @@ namespace ADORE.Configuration
 			if(!pfs.Any()) { throw new ArgumentException(); }
 			return DbProviderFactories.GetFactory(pfs.First().ProviderName);
 		}
+		#endregion
 
+		#region connection management
 		/// <summary>
 		/// <para>Registers multiple connections from ConnectionStringConfigs</para>
 		/// </summary>
@@ -84,5 +94,6 @@ namespace ADORE.Configuration
 			if(!ConnectionStrings.ContainsKey(key)) { throw new ArgumentOutOfRangeException("key", $"key: {key}"); }
 			return ConnectionStrings[key];
 		}
+		#endregion
 	}
 }

@@ -60,7 +60,11 @@ namespace ADORE
 		/// <para>Adds a parameter to the collection</para>
 		/// </summary>
 		/// <param name="param">The parameter to add</param>
-		public void Add(QueryParameter param) => _parameters[param.ParameterizedName] = param;
+		public void Add(QueryParameter param)
+		{
+			if(string.IsNullOrEmpty(param.Name)) { param.Name = _parameters.Count.ToString(); }
+			_parameters[param.ParameterizedName] = param;
+		}
 
 		/// <summary>
 		/// <para>Maps an object's fields and properties into parameters and adds them to the collection</para>
@@ -68,23 +72,43 @@ namespace ADORE
 		/// <param name="param"></param>
 		public void MapObject(object param)
 		{
-			foreach(var field in param.GetType().GetFields())
+			Type t = param.GetType();
+			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(TimeSpan))
 			{
-				Add(new QueryParameter() {
-					Name = field.Name,
-					Value = field.GetValue(param),
-					Type = TypeMapSpec.GetDbTypeMapping(field.FieldType),
-					Direction = ParameterDirection.InputOutput,
-				});
+				Add(MapParameter(null, param));
 			}
-			foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead))
+			else
 			{
-				Add(new QueryParameter() {
-					Name = prop.Name,
-					Value = prop.GetValue(param),
-					Type = TypeMapSpec.GetDbTypeMapping(prop.PropertyType),
-					Direction = ParameterDirection.InputOutput,
-				});
+				foreach(var field in param.GetType().GetFields())
+				{
+					Add(MapParameter(field.Name, field.GetValue(param)));
+				}
+				foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead))
+				{
+					Add(MapParameter(prop.Name, prop.GetValue(param)));
+				}
+			}
+		}
+		private static QueryParameter MapParameter<T>(string name, T value)
+		{
+			if(value is TimeSpan ts)
+			{
+				return new QueryParameter() {
+					Name = name ?? string.Empty,
+					Value = ts.Ticks,
+					Type = DbType.Int64,
+					Direction = ParameterDirection.InputOutput
+				};
+			}
+			else
+			{
+				return new QueryParameter()
+				{
+					Name = name ?? string.Empty,
+					Value = value,
+					Type = TypeMapSpec.GetDbTypeMappingFrom(value),
+					Direction = ParameterDirection.InputOutput
+				};
 			}
 		}
 	}

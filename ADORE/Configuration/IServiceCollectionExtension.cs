@@ -21,9 +21,8 @@ namespace ADORE.Configuration
 			var cr = sp.GetService<ConnectionRegistry>();
 
 			// now use the connectionloader to add the DB instance
-			var factory = cr.GetFactory(key);
-			var connStr = cr.ConnectionStrings[key].ConnectionString;
-			var db = (T)Activator.CreateInstance(typeof(T), factory, connStr);
+			var dbinfo = cr[key];
+			var db = (T)Activator.CreateInstance(typeof(T), dbinfo.factory, dbinfo.config.ConnectionString);
 			return services.AddSingleton(db);
 		}
 		/// <summary>

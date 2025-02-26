@@ -13,7 +13,7 @@ namespace ADORE
 		/// <para>The parameter name.</para>
 		/// <para>If the parameter is named, this will be used. Positional parameters will only use this if it parses to an int (after trimming an "@" prefix).</para>
 		/// </summary>
-		public string Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 		/// <summary>
 		/// <para>The value of the parameter.</para>
 		/// </summary>
