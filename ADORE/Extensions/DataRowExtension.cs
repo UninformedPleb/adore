@@ -8,21 +8,28 @@ namespace ADORE.Extensions
 		{
 			Type t = typeof(T);
 			T thing = Activator.CreateInstance<T>();
-			
-			foreach(var field in t.GetFields())
-			{
-				if(dr.Table.Columns.Contains(field.Name) && dr.Table.Columns[field.Name].DataType.Equals(field.FieldType))
-				{
-					field.SetValue(thing, dr[field.Name]);
-				}
-			}
-			foreach(var prop in t.GetProperties().Where(p => p.CanWrite))
-			{
-				if(dr.Table.Columns.Contains(prop.Name) && dr.Table.Columns[prop.Name].DataType.Equals(prop.PropertyType))
-				{
-					prop.SetValue(thing, dr[prop.Name]);
-				}
-			}
+
+			var fields =
+				from f in t.GetFields()
+				where !f.IsInitOnly && !f.IsStatic && !f.IsLiteral
+					&& dr.Table.Columns.Contains(f.Name)
+					&& (
+						dr.Table.Columns[f.Name].DataType.Equals(f.FieldType)
+						|| dr.Table.Columns[f.Name].DataType.IsSubclassOf(f.FieldType)
+					)
+				select f;
+			foreach(var field in fields) { field.SetValue(thing, dr[field.Name]); }
+
+			var props =
+				from p in t.GetProperties()
+				where p.CanWrite
+					&& dr.Table.Columns.Contains(p.Name)
+					&& (
+						dr.Table.Columns[p.Name].DataType.Equals(p.PropertyType)
+						|| dr.Table.Columns[p.Name].DataType.IsSubclassOf(p.PropertyType)
+					)
+				select p;
+			foreach(var prop in props) { prop.SetValue(thing, dr[prop.Name]); }
 
 			return thing;
 		}
