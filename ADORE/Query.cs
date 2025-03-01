@@ -48,7 +48,11 @@ namespace ADORE
 
 			// sanity-check:
 			// if the query text is blank, we can't run it.
-			if(string.IsNullOrEmpty(Text)) { return result; }
+			if(string.IsNullOrEmpty(Text))
+			{
+				result.Exception = new ArgumentException("Query text is empty.");
+				return result;
+			}
 
 			// get a connection OUTSIDE the try/finally so we can make sure it always gets closed
 			using DbConnection conn = _parent.CreateConnection();
