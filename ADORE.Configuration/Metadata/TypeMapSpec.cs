@@ -24,7 +24,7 @@ namespace ADORE.Configuration.Metadata
 		}
 		private static void LoadTypeMapData()
 		{
-			using(var s = typeof(TypeMapSpec).Assembly.GetManifestResourceStream("ADORE.Metadata.TypeMapData.json"))
+			using(var s = typeof(TypeMapSpec).Assembly.GetManifestResourceStream("ADORE.Configuration.Metadata.TypeMapData.json"))
 			using(var sr = new StreamReader(s))
 			{
 				TypeMapData = JsonSerializer.Deserialize<List<TypeMapSpec>>(sr.ReadToEnd());
