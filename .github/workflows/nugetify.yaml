@@ -15,9 +15,13 @@ jobs:
     - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8
-    - name: Build
-      run: dotnet build -c Release ADORE
-    - name: Pack nuget
-      run: dotnet pack -c Release --no-build --output .
-    - name: Push to nuget server
-      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+    - name: Build and pack ADORE
+      run: |
+        cd ./ADORE
+        dotnet pack -c Release --o ../
+    - name: Build and pack ADORE.Configuration
+      run: |
+        cd ./ADORE.Configuration
+        dotnet pack -c Release --o ../
+    - name: Push to nuget
+      run: dotnet nuget push "*.nupkg" --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
