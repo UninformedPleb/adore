@@ -34,24 +34,24 @@ namespace ADORE
 		/// <summary>
 		/// <para>Gets a Query object initialized to use this Database.</para>
 		/// </summary>
-		/// <param name="sql">The query string</param>
+		/// <param name="querytext">The query string</param>
 		/// <param name="parameterMap">The parameters, as an array of objects</param>
 		/// <returns></returns>
-		public Query CreateQuery(string sql, params object[] parameterMap)
+		public Query CreateQuery(string querytext, params object[] parameterMap)
 		{
-			return CreateQuery(sql, CommandType.Text, parameterMap);
+			return CreateQuery(querytext, CommandType.Text, parameterMap);
 		}
 		/// <summary>
 		/// <para>Gets a Query object initialized to use this Database.</para>
 		/// </summary>
-		/// <param name="sql">The query string.</param>
+		/// <param name="querytext">The query string.</param>
 		/// <param name="commandType">The type of query.</param>
 		/// <param name="parameterMap">The parameters, as an array of objects</param>
 		/// <returns></returns>
-		public Query CreateQuery(string sql, CommandType commandType = CommandType.Text, params object[] parameterMap)
+		public Query CreateQuery(string querytext, CommandType commandType = CommandType.Text, params object[] parameterMap)
 		{
 			var q = new Query(this);
-			q.Text = sql;
+			q.Text = querytext;
 			q.CommandType = commandType;
 			if(parameterMap is not null)
 			{
