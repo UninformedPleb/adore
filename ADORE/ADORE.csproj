@@ -10,7 +10,7 @@
     <Description>ADO is Really Easy! A full data-access layer, with a focus on clean, readable code.</Description>
     <Copyright>UninformedPleb (Matt Hanvelt)</Copyright>
     <PackageProjectUrl>https://github.com/UninformedPleb/adore</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile></PackageReadmeFile>
     <RepositoryUrl>https://github.com/UninformedPleb/adore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ADO;Database</PackageTags>
