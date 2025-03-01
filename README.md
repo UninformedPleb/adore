@@ -202,6 +202,13 @@ the query.
 ```C#
 var results = query.Run();
 ```
+
+Or if you're in a hurry and don't need to keep the Query object, just chain the
+call to .Run():
+```C#
+var results = mydb.CreateQuery("SELECT * FROM Products WHERE Color = @Color", new { Color = userColor }).Run();
+```
+
 Query.Run() handles all of the connection, command, parameters, and other
 technical minutiae for you and returns a QueryResult. What's a QueryResult? It's
 an object that contains *all* of the results, statuses, errors, and anything
