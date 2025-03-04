@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace ADORE
+namespace ADORE.ORM
 {
 	/// <summary>
 	/// <para>Represents a database schema.</para>

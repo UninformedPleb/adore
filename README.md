@@ -32,6 +32,10 @@ planned for future releases.
 - Automatic IDistributedCache management
   - Per-entity lifetime configuration
   - Conditional cache overrides and bypasses
+- More ORM-ish functionality
+  - Table mappings with auto-CRUD
+  - Column-spec generation
+  - Filter type generation
 
 ## How to use ADORE
 ### Configure Providers

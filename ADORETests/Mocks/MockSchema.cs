@@ -1,4 +1,5 @@
 ﻿using ADORE;
+using ADORE.ORM;
 
 namespace ADORETests.Mocks
 {
