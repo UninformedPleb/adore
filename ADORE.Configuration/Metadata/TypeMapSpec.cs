@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ADORE.Configuration.Metadata
 {
@@ -93,6 +94,7 @@ namespace ADORE.Configuration.Metadata
 		/// <summary>
 		/// <para>The DbType enumerated constant</para>
 		/// </summary>
+		[JsonConverter(typeof(JsonStringEnumConverter))]
 		public DbType DbType { get; set; }
 	}
 }

@@ -46,13 +46,13 @@
 		"SqlType": "money",
 		"CSharpType": "decimal",
 		"CSharpNullDefault": false,
-		"DbType": "Money"
+		"DbType": "Currency"
 	},
 	{
 		"SqlType": "smallmoney",
 		"CSharpType": "decimal",
 		"CSharpNullDefault": false,
-		"DbType": "Money"
+		"DbType": "Currency"
 	},
 	// approximate numerics
 	{
@@ -109,7 +109,7 @@
 		"SqlType": "char",
 		"CSharpType": "char",
 		"CSharpNullDefault": false,
-		"DbType": "Char"
+		"DbType": "String"
 	},
 	{
 		"SqlType": "varchar",
@@ -128,7 +128,7 @@
 		"SqlType": "nchar",
 		"CSharpType": "char",
 		"CSharpNullDefault": false,
-		"DbType": "Char"
+		"DbType": "String"
 	},
 	{
 		"SqlType": "nvarchar",
