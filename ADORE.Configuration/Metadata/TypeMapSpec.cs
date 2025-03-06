@@ -27,7 +27,7 @@ namespace ADORE.Configuration.Metadata
 			using(var s = typeof(TypeMapSpec).Assembly.GetManifestResourceStream("ADORE.Configuration.Metadata.TypeMapData.json"))
 			using(var sr = new StreamReader(s))
 			{
-				TypeMapData = JsonSerializer.Deserialize<List<TypeMapSpec>>(sr.ReadToEnd());
+				TypeMapData = JsonSerializer.Deserialize<List<TypeMapSpec>>(sr.ReadToEnd(), new JsonSerializerOptions() { ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
 			}
 		}
 		#endregion
