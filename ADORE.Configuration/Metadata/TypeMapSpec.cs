@@ -69,7 +69,12 @@ namespace ADORE.Configuration.Metadata
 		/// </summary>
 		/// <param name="o">The object to get the type from</param>
 		/// <returns>The DbType mapped to the object's concrete type</returns>
-		public static DbType GetDbTypeMappingFrom(object o) => GetDbTypeMapping(o.GetType());
+		public static DbType GetDbTypeMappingFrom<T>(T o)
+		{
+			var t = typeof(T);
+			if(t.IsGenericType && t.Equals(typeof(Nullable))) { t = t.GenericTypeArguments[0]; }
+			return GetDbTypeMapping(t);
+		}
 		/// <summary>
 		/// <para>Gets the DbType for a given Type</para>
 		/// </summary>
