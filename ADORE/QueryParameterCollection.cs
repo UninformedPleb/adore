@@ -9,7 +9,7 @@ namespace ADORE
 	/// <summary>
 	/// <para>Manages a collection of QueryParameter objects and provides bulk mappings as a method of intake.</para>
 	/// </summary>
-	public class QueryParameterCollection : IEnumerable
+	public class QueryParameterCollection : IEnumerable<KeyValuePair<string,QueryParameter>>
 	{
 		private Dictionary<string,QueryParameter> _parameters = new Dictionary<string, QueryParameter>();
 
@@ -24,7 +24,8 @@ namespace ADORE
 		internal QueryParameterCollection() { }
 
 		#region IEnumerable
-		public IEnumerator GetEnumerator() => _parameters.GetEnumerator();
+		public IEnumerator<KeyValuePair<string,QueryParameter>> GetEnumerator() => _parameters.GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		#endregion
 
 		#region command parameter mapping - internal only
