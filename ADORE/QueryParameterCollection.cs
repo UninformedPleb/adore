@@ -76,11 +76,19 @@ namespace ADORE
 		/// <para>Maps an object's fields and properties into parameters and adds them to the collection</para>
 		/// </summary>
 		/// <param name="param"></param>
-		public void MapObject(object param, string name = null)
+		public void MapObject<T>(T param, string name = null)
 		{
-			Type t;
+			Type t = typeof(T);
+			if(param is null)
+			{
+				Add(MapParameter(t, param, name));
+				return;
+			}
+
+			// unwrap it if it's null
 			(t, param) = UnwrapIfNullable(param);
 
+			// detect single values and map them, or else traverse the object fields/properties and send them back through
 			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(DateTimeOffset) || t == typeof(DateOnly) || t == typeof(TimeOnly) || t == typeof(TimeSpan))
 			{
 				Add(MapParameter(t, param, name));
@@ -97,7 +105,7 @@ namespace ADORE
 				}
 			}
 		}
-		private static (Type innerType, object value) UnwrapIfNullable(object unknownObject)
+		private static (Type innerType, T value) UnwrapIfNullable<T>(T unknownObject)
 		{
 			Type t = unknownObject.GetType();
 			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
@@ -106,11 +114,11 @@ namespace ADORE
 				if((bool)hasValueProp.GetValue(unknownObject))
 				{
 					var valueProp = t.GetProperty("Value");
-					return (t.GenericTypeArguments[0], valueProp.GetValue(unknownObject));
+					return (t.GenericTypeArguments[0], (T)valueProp.GetValue(unknownObject));
 				}
 				else
 				{
-					return (t.GenericTypeArguments[0], null);
+					return (t.GenericTypeArguments[0], default);
 				}
 			}
 			return (t, unknownObject);
