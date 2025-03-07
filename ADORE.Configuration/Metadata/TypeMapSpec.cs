@@ -25,11 +25,10 @@ namespace ADORE.Configuration.Metadata
 		}
 		private static void LoadTypeMapData()
 		{
-			using(var s = typeof(TypeMapSpec).Assembly.GetManifestResourceStream("ADORE.Configuration.Metadata.TypeMapData.json"))
-			using(var sr = new StreamReader(s))
-			{
-				TypeMapData = JsonSerializer.Deserialize<List<TypeMapSpec>>(sr.ReadToEnd(), new JsonSerializerOptions() { ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
-			}
+			TypeMapData = JsonSerializer.Deserialize<List<TypeMapSpec>>(
+				typeof(TypeMapSpec).Assembly.GetManifestResourceStream("ADORE.Configuration.Metadata.TypeMapData.json"),
+				new JsonSerializerOptions() { ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }
+			);
 		}
 		#endregion
 
