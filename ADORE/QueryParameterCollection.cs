@@ -79,14 +79,13 @@ namespace ADORE
 		public void MapObject<T>(T param, string name = null)
 		{
 			Type t = typeof(T);
-			if(param is null)
-			{
-				Add(MapParameter(t, param, name));
-				return;
-			}
+			MapObject(t, param, name);
+		}
 
-			// unwrap it if it's null
-			(t, param) = UnwrapIfNullable(param);
+		private void MapObject(Type t, object param, string name = null)
+		{
+			// unwrap it if it's a Nullable<T>
+			(t, param) = UnwrapIfNullable(t, param);
 
 			// detect single values and map them, or else traverse the object fields/properties and send them back through
 			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(DateTimeOffset) || t == typeof(DateOnly) || t == typeof(TimeOnly) || t == typeof(TimeSpan))
@@ -97,28 +96,29 @@ namespace ADORE
 			{
 				foreach(var field in t.GetFields())
 				{
-					MapObject(field.GetValue(param), field.Name);
+					MapObject(field.FieldType, field.GetValue(param), field.Name);
 				}
 				foreach(var prop in t.GetProperties().Where(p => p.CanRead))
 				{
-					MapObject(prop.GetValue(param), prop.Name);
+					MapObject(prop.PropertyType, prop.GetValue(param), prop.Name);
 				}
 			}
 		}
-		private static (Type innerType, T value) UnwrapIfNullable<T>(T unknownObject)
+		private static (Type innerType, object value) UnwrapIfNullable(Type t, object unknownObject)
 		{
-			Type t = unknownObject.GetType();
 			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
 			{
+				if(unknownObject is null) { return (t.GenericTypeArguments[0], null); }
+
 				var hasValueProp = t.GetProperty("HasValue");
 				if((bool)hasValueProp.GetValue(unknownObject))
 				{
 					var valueProp = t.GetProperty("Value");
-					return (t.GenericTypeArguments[0], (T)valueProp.GetValue(unknownObject));
+					return (t.GenericTypeArguments[0], valueProp.GetValue(unknownObject));
 				}
 				else
 				{
-					return (t.GenericTypeArguments[0], default);
+					return (t.GenericTypeArguments[0], null);
 				}
 			}
 			return (t, unknownObject);
