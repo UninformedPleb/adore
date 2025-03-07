@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections;
+using System.Data;
 using System.Data.Common;
 
 using ADORE.Configuration.Metadata;
@@ -8,7 +9,7 @@ namespace ADORE
 	/// <summary>
 	/// <para>Manages a collection of QueryParameter objects and provides bulk mappings as a method of intake.</para>
 	/// </summary>
-	public class QueryParameterCollection
+	public class QueryParameterCollection : IEnumerable
 	{
 		private Dictionary<string,QueryParameter> _parameters = new Dictionary<string, QueryParameter>();
 
@@ -21,6 +22,10 @@ namespace ADORE
 
 		// internal, so this should only be created by Query
 		internal QueryParameterCollection() { }
+
+		#region IEnumerable
+		public IEnumerator GetEnumerator() => _parameters.GetEnumerator();
+		#endregion
 
 		#region command parameter mapping - internal only
 		/// <summary>
