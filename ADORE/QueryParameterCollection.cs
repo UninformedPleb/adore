@@ -73,6 +73,14 @@ namespace ADORE
 		public void MapObject(object param)
 		{
 			Type t = param.GetType();
+			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
+			{
+				// unwrap Nullable<T>'s into just T's for mapping
+				var prop = t.GetProperty("Value");
+				param = prop.GetValue(param);
+				t = t.GenericTypeArguments[0];
+			}
+
 			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(TimeSpan))
 			{
 				Add(MapParameter(null, param));

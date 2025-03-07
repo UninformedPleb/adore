@@ -40,7 +40,7 @@ namespace ADORE.Extensions
 		{
 			if(src.Equals(dest)) { return true; }
 			if(src.IsSubclassOf(dest)) { return true; }
-			if(dest.IsGenericType && dest.Equals(typeof(Nullable)))
+			if(dest.IsGenericType && dest.Equals(typeof(Nullable<>)))
 			{
 				if(src.Equals(dest.GenericTypeArguments[0])) { return true; }
 				if(src.IsSubclassOf(dest.GenericTypeArguments[0])) { return true; }

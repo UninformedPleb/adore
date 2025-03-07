@@ -71,7 +71,7 @@ namespace ADORE.Configuration.Metadata
 		public static DbType GetDbTypeMappingFrom<T>(T o)
 		{
 			var t = typeof(T);
-			if(t.IsGenericType && t.Equals(typeof(Nullable))) { t = t.GenericTypeArguments[0]; }
+			if(t.IsGenericType && t.Equals(typeof(Nullable<>))) { t = t.GenericTypeArguments[0]; }
 			return GetDbTypeMapping(t);
 		}
 		/// <summary>
