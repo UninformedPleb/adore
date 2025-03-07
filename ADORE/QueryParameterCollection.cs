@@ -76,40 +76,52 @@ namespace ADORE
 		/// <para>Maps an object's fields and properties into parameters and adds them to the collection</para>
 		/// </summary>
 		/// <param name="param"></param>
-		public void MapObject(object param)
+		public void MapObject(object param, string name = null)
 		{
-			Type t = param.GetType();
-			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
-			{
-				// unwrap Nullable<T>'s into just T's for mapping
-				var prop = t.GetProperty("Value");
-				param = prop.GetValue(param);
-				t = t.GenericTypeArguments[0];
-			}
+			Type t;
+			(t, param) = UnwrapIfNullable(param);
 
-			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(TimeSpan))
+			if(t.IsPrimitive || t == typeof(string) || t == typeof(DateTime) || t == typeof(DateTimeOffset) || t == typeof(DateOnly) || t == typeof(TimeOnly) || t == typeof(TimeSpan))
 			{
-				Add(MapParameter(null, param));
+				Add(MapParameter(t, param, name));
 			}
 			else
 			{
-				foreach(var field in param.GetType().GetFields())
+				foreach(var field in t.GetFields())
 				{
-					Add(MapParameter(field.Name, field.GetValue(param)));
+					MapObject(field.GetValue(param), field.Name);
 				}
-				foreach(var prop in param.GetType().GetProperties().Where(p => p.CanRead))
+				foreach(var prop in t.GetProperties().Where(p => p.CanRead))
 				{
-					Add(MapParameter(prop.Name, prop.GetValue(param)));
+					MapObject(prop.GetValue(param), prop.Name);
 				}
 			}
 		}
-		private static QueryParameter MapParameter<T>(string name, T value)
+		private static (Type innerType, object value) UnwrapIfNullable(object unknownObject)
 		{
-			if(value is TimeSpan ts)
+			Type t = unknownObject.GetType();
+			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
+			{
+				var hasValueProp = t.GetProperty("HasValue");
+				if((bool)hasValueProp.GetValue(unknownObject))
+				{
+					var valueProp = t.GetProperty("Value");
+					return (t.GenericTypeArguments[0], valueProp.GetValue(unknownObject));
+				}
+				else
+				{
+					return (t.GenericTypeArguments[0], null);
+				}
+			}
+			return (t, unknownObject);
+		}
+		private static QueryParameter MapParameter(Type t, object value, string name)
+		{
+			if(t.Equals(typeof(TimeSpan)))
 			{
 				return new QueryParameter() {
 					Name = name ?? string.Empty,
-					Value = ts.Ticks,
+					Value = value is null ? value : ((TimeSpan)value).Ticks,
 					Type = DbType.Int64,
 					Direction = ParameterDirection.Input
 				};
@@ -120,7 +132,7 @@ namespace ADORE
 				{
 					Name = name ?? string.Empty,
 					Value = value,
-					Type = TypeMapSpec.GetDbTypeMappingFrom(value),
+					Type = TypeMapSpec.GetDbTypeMapping(t),
 					Direction = ParameterDirection.Input
 				};
 			}
