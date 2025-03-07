@@ -97,7 +97,7 @@ namespace ADORE
 					Name = name ?? string.Empty,
 					Value = ts.Ticks,
 					Type = DbType.Int64,
-					Direction = ParameterDirection.InputOutput
+					Direction = ParameterDirection.Input
 				};
 			}
 			else
@@ -107,7 +107,7 @@ namespace ADORE
 					Name = name ?? string.Empty,
 					Value = value,
 					Type = TypeMapSpec.GetDbTypeMappingFrom(value),
-					Direction = ParameterDirection.InputOutput
+					Direction = ParameterDirection.Input
 				};
 			}
 		}
