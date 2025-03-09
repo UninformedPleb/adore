@@ -76,9 +76,9 @@ namespace ADORE
 		/// <para>Maps an object's fields and properties into parameters and adds them to the collection</para>
 		/// </summary>
 		/// <param name="param"></param>
-		public void MapObject<T>(T param, string name = null)
+		public void MapObject(object param, string name = null)
 		{
-			Type t = typeof(T);
+			Type t = param.GetType();
 			MapObject(t, param, name);
 		}
 
@@ -96,30 +96,22 @@ namespace ADORE
 			{
 				foreach(var field in t.GetFields())
 				{
-					MapObject(field.FieldType, field.GetValue(param), field.Name);
+					MapObject(field.FieldType, param is null ? null : field.GetValue(param), field.Name);
 				}
 				foreach(var prop in t.GetProperties().Where(p => p.CanRead))
 				{
-					MapObject(prop.PropertyType, prop.GetValue(param), prop.Name);
+					MapObject(prop.PropertyType, param is null ? null : prop.GetValue(param), prop.Name);
 				}
 			}
 		}
 		private static (Type innerType, object value) UnwrapIfNullable(Type t, object unknownObject)
 		{
-			if(t.IsGenericType && t.Equals(typeof(Nullable<>)))
+			if(t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
-				if(unknownObject is null) { return (t.GenericTypeArguments[0], null); }
+				// how can Nullable<T>'s even be null? they're a struct...
+				if(unknownObject is null) { return (t.GetGenericArguments()[0], null); }
 
-				var hasValueProp = t.GetProperty("HasValue");
-				if((bool)hasValueProp.GetValue(unknownObject))
-				{
-					var valueProp = t.GetProperty("Value");
-					return (t.GenericTypeArguments[0], valueProp.GetValue(unknownObject));
-				}
-				else
-				{
-					return (t.GenericTypeArguments[0], null);
-				}
+				return (t.GetGenericArguments()[0], (bool)t.GetProperty("HasValue").GetValue(unknownObject) ? t.GetProperty("Value").GetValue(unknownObject) : null);
 			}
 			return (t, unknownObject);
 		}

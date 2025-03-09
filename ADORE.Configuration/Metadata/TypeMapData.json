@@ -2,68 +2,68 @@
 	// exact numerics
 	{
 		"SqlType": "tinyint",
-		"CSharpType": "byte",
+		"CSharpType": "Byte",
 		"CSharpNullDefault": false,
 		"DbType": "Byte"
 	},
 	{
 		"SqlType": "smallint",
-		"CSharpType": "short",
+		"CSharpType": "Int16",
 		"CSharpNullDefault": false,
 		"DbType": "Int16"
 	},
 	{
 		"SqlType": "int",
-		"CSharpType": "int",
+		"CSharpType": "Int32",
 		"CSharpNullDefault": false,
 		"DbType": "Int32"
 	},
 	{
 		"SqlType": "bigint",
-		"CSharpType": "long",
+		"CSharpType": "Int64",
 		"CSharpNullDefault": false,
 		"DbType": "Int64"
 	},
 	{
 		"SqlType": "bit",
-		"CSharpType": "bool",
+		"CSharpType": "Boolean",
 		"CSharpNullDefault": false,
 		"DbType": "Boolean"
 	},
 	{
 		"SqlType": "decimal",
-		"CSharpType": "decimal",
+		"CSharpType": "Decimal",
 		"CSharpNullDefault": false,
 		"DbType": "Decimal"
 	},
 	{
 		"SqlType": "numeric",
-		"CSharpType": "decimal",
+		"CSharpType": "Decimal",
 		"CSharpNullDefault": false,
 		"DbType": "Decimal"
 	},
 	{
 		"SqlType": "money",
-		"CSharpType": "decimal",
+		"CSharpType": "Decimal",
 		"CSharpNullDefault": false,
 		"DbType": "Currency"
 	},
 	{
 		"SqlType": "smallmoney",
-		"CSharpType": "decimal",
+		"CSharpType": "Decimal",
 		"CSharpNullDefault": false,
 		"DbType": "Currency"
 	},
 	// approximate numerics
 	{
 		"SqlType": "real",
-		"CSharpType": "float",
+		"CSharpType": "Single",
 		"CSharpNullDefault": false,
 		"DbType": "Single"
 	},
 	{
 		"SqlType": "float",
-		"CSharpType": "double",
+		"CSharpType": "Double",
 		"CSharpNullDefault": false,
 		"DbType": "Double"
 	},
@@ -107,57 +107,57 @@
 	// character strings
 	{
 		"SqlType": "char",
-		"CSharpType": "char",
+		"CSharpType": "Char",
 		"CSharpNullDefault": false,
 		"DbType": "String"
 	},
 	{
 		"SqlType": "varchar",
-		"CSharpType": "string",
+		"CSharpType": "String",
 		"CSharpNullDefault": true,
 		"DbType": "String"
 	},
 	{
 		"SqlType": "text",
-		"CSharpType": "string",
+		"CSharpType": "String",
 		"CSharpNullDefault": true,
 		"DbType": "String"
 	},
 	// unicode character strings
 	{
 		"SqlType": "nchar",
-		"CSharpType": "char",
+		"CSharpType": "Char",
 		"CSharpNullDefault": false,
 		"DbType": "String"
 	},
 	{
 		"SqlType": "nvarchar",
-		"CSharpType": "string",
+		"CSharpType": "String",
 		"CSharpNullDefault": true,
 		"DbType": "String"
 	},
 	{
 		"SqlType": "ntext",
-		"CSharpType": "string",
+		"CSharpType": "String",
 		"CSharpNullDefault": true,
 		"DbType": "String"
 	},
 	// binary strings
 	{
 		"SqlType": "binary",
-		"CSharpType": "byte[]",
+		"CSharpType": "Byte[]",
 		"CSharpNullDefault": true,
 		"DbType": "Binary"
 	},
 	{
 		"SqlType": "varbinary",
-		"CSharpType": "byte[]",
+		"CSharpType": "Byte[]",
 		"CSharpNullDefault": true,
 		"DbType": "Binary"
 	},
 	{
 		"SqlType": "image",
-		"CSharpType": "byte[]",
+		"CSharpType": "Byte[]",
 		"CSharpNullDefault": true,
 		"DbType": "Binary"
 	},
