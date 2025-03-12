@@ -1,6 +1,8 @@
 ﻿using System.Data;
 using System.Data.Common;
 
+using ADORE.ORM;
+
 namespace ADORE
 {
 	/// <summary>
@@ -8,7 +10,7 @@ namespace ADORE
 	/// <para>Use of this class requires inheriting it and implementing it with the components of the database it is representing.</para>
 	/// <para>To use a ready-made database-agnostic implementation of this class, use AdHocDatabase.</para>
 	/// </summary>
-	public abstract class Database
+	public abstract class Database : IQueryCreator
 	{
 		private string _connectionString;
 

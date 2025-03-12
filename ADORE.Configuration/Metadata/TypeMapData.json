@@ -84,7 +84,7 @@
 		"SqlType": "datetime2",
 		"CSharpType": "DateTime",
 		"CSharpNullDefault": false,
-		"DbType": "DateTime"
+		"DbType": "DateTime2"
 	},
 	{
 		"SqlType": "datetimeoffset",
