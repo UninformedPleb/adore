@@ -16,6 +16,13 @@ project organized. You can build a repository-pattern library with ease. It even
 lends itself well to code-generation. Check the roadmap for features being
 planned for future releases.
 
+### But... Why use ADORE instead of EF or Dapper?
+Good question. Those are certainly the most well-known "easy" data access
+systems in the .NET ecosystem. But EF requires 100% commitment to a very heavy
+abstraction, and Dapper doesn't handle any of the provider context pieces of the
+puzzle. ADORE is meant to be a simplification of ADO.NET itself. It falls
+somewhere in between ADO.NET's toolbox approach and EF's bubble-wrapped style.
+
 ## Feature Roadmap
 - Text-file database providers (JSON, XML, CSV)
   - ADO.NET read operations
