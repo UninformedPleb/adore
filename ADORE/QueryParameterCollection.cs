@@ -34,10 +34,10 @@ namespace ADORE
 		/// <para>NOTE: This is destructive to the existing command parameters.</para>
 		/// </summary>
 		/// <param name="cmd">The command to map to.</param>
-		internal void MapToCommand(DbCommand cmd)
+		internal void MapToCommand(IDbCommand cmd)
 		{
 			cmd.Parameters.Clear();
-			DbParameter param;
+			IDbDataParameter param;
 			foreach(var kvp in _parameters)
 			{
 				param = cmd.CreateParameter();
@@ -53,11 +53,11 @@ namespace ADORE
 		/// <para>Input-only parameters are left as-is, since their values should not have changed in the database script.</para>
 		/// </summary>
 		/// <param name="cmd">The command to map from.</param>
-		internal void MapFromCommand(DbCommand cmd)
+		internal void MapFromCommand(IDbCommand cmd)
 		{
 			foreach(var kvp in _parameters.Where(kvp => kvp.Value.Direction != ParameterDirection.Input))
 			{
-				kvp.Value.Value = cmd.Parameters[kvp.Value.ParameterizedName].Value is DBNull ? null : cmd.Parameters[kvp.Value.ParameterizedName].Value;
+				kvp.Value.Value = ((IDataParameter)(cmd.Parameters[kvp.Value.ParameterizedName])).Value is DBNull ? null : ((IDataParameter)(cmd.Parameters[kvp.Value.ParameterizedName])).Value;
 			}
 		}
 		#endregion

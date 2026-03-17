@@ -26,7 +26,7 @@ namespace ADORE
 			_connectionString = connectionString;
 		}
 
-		internal virtual DbConnection CreateConnection()
+		internal virtual IDbConnection CreateConnection()
 		{
 			var conn = Factory.CreateConnection();
 			conn.ConnectionString = _connectionString;

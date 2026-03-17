@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Data.Common;
 
 namespace ADORE.Extensions
 {
@@ -10,7 +9,7 @@ namespace ADORE.Extensions
 		/// <para>There are no side-effects from repeated calls to this method.</para>
 		/// </summary>
 		/// <param name="conn">The connection to get ready</param>
-        internal static void ReadyConnection(this DbConnection conn)
+        internal static void ReadyConnection(this IDbConnection conn)
         {
             if (conn.State == ConnectionState.Broken) { conn.Close(); }
             if (conn.State == ConnectionState.Closed) { conn.Open(); }
@@ -20,7 +19,7 @@ namespace ADORE.Extensions
 		/// <para>There are no side-effects from repeated calls to this method.</para>
 		/// </summary>
 		/// <param name="conn">The connection to release</param>
-		internal static void ReleaseConnection(this DbConnection conn)
+		internal static void ReleaseConnection(this IDbConnection conn)
         {
             if (conn.State == ConnectionState.Open || conn.State == ConnectionState.Broken)
             {

@@ -55,12 +55,12 @@ namespace ADORE
 			}
 
 			// get a connection OUTSIDE the try/finally so we can make sure it always gets closed
-			using DbConnection conn = _parent.CreateConnection();
+			using IDbConnection conn = _parent.CreateConnection();
 
 			try
 			{
 				// set up the command from the query values
-				using var cmd = conn.CreateCommand();
+				using IDbCommand cmd = conn.CreateCommand();
 				cmd.CommandText = Text;
 				cmd.CommandType = CommandType;
 				// map parameters to the command
@@ -69,9 +69,19 @@ namespace ADORE
 				// run the command
 				conn.ReadyConnection();
 				DataSet ds = new DataSet();
-				using var da = _parent.Factory.CreateDataAdapter();
-				da.SelectCommand = cmd;
-				da.Fill(ds);
+				IDbDataAdapter da = _parent.Factory.CreateDataAdapter();
+				try
+				{
+					da.SelectCommand = cmd;
+					da.Fill(ds);
+				}
+				finally
+				{
+					// shenanigans because IDbDataAdapter isn't IDisposable, but DbDataAdapter always is.
+					// it's POSSIBLE to implement an IDbDataAdapter that doesn't implement IDisposable, but it's exceedingly unlikely.
+					// thus, always check if it needs disposing and then do so if it implements IDisposable.
+					if(da is IDisposable) { ((IDisposable)da).Dispose(); }
+				}
 				conn.ReleaseConnection();
 				// map parameters back from the command
 				Parameters.MapFromCommand(cmd);
@@ -105,12 +115,12 @@ namespace ADORE
 			if(string.IsNullOrEmpty(Text)) { return result; }
 
 			// get a connection OUTSIDE the try/finally so we can make sure it always gets closed
-			using DbConnection conn = _parent.CreateConnection();
+			using IDbConnection conn = _parent.CreateConnection();
 
 			try
 			{
 				// set up the command from the query values
-				using var cmd = conn.CreateCommand();
+				using IDbCommand cmd = conn.CreateCommand();
 				cmd.CommandText = Text;
 				cmd.CommandType = CommandType;
 				// map parameters to the command
@@ -119,9 +129,19 @@ namespace ADORE
 				// run the command
 				conn.ReadyConnection();
 				DataSet ds = new DataSet();
-				using var da = _parent.Factory.CreateDataAdapter();
-				da.SelectCommand = cmd;
-				await Task.Run(() => { da.Fill(ds); });
+				IDbDataAdapter da = _parent.Factory.CreateDataAdapter();
+				try
+				{
+					da.SelectCommand = cmd;
+					await Task.Run(() => { da.Fill(ds); });
+				}
+				finally
+				{
+					// shenanigans because IDbDataAdapter isn't IDisposable, but DbDataAdapter always is.
+					// it's POSSIBLE to implement an IDbDataAdapter that doesn't implement IDisposable, but it's exceedingly unlikely.
+					// thus, always check if it needs disposing and then do so if it implements IDisposable.
+					if(da is IDisposable) { ((IDisposable)da).Dispose(); }
+				}
 				conn.ReleaseConnection();
 				// map parameters back from the command
 				Parameters.MapFromCommand(cmd);
